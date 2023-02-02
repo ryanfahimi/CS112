@@ -10,7 +10,7 @@ class FloatLimits {
         System.out.println("Smallest positive float is " + floatTest);
 
         double doubleTest = 1.0;
-        // Repeatedly divide floatTest by 2 until it is not distinguishable from 0
+        // Repeatedly divide doubleTest by 2 until it is not distinguishable from 0
         while ((doubleTest/2) != 0) {
             doubleTest /= 2;
         }
