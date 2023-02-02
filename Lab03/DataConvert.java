@@ -33,7 +33,7 @@ class DataConvert {
         byteTest = (byte) intTest;
         System.out.println("byte value of 258 is " + byteTest);
 
-        // Set int variable to 257 and convert it to byte
+        // Set int variable to 511 and convert it to byte
         intTest = 511;
         byteTest = (byte) intTest;
         System.out.println("byte value of 511 is " + byteTest);
