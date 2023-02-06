@@ -21,13 +21,13 @@ class Sphere {
 
     // Method to get the surface area of the sphere
     double surfaceArea() {
-        double surfaceArea = 4 * Math.PI * radius() * radius();
+        double surfaceArea = 4 * Math.PI * Math.pow(radius(), 2);
         return surfaceArea;
     }
 
     // Method to get the volume of the sphere
     double volume() {
-        double volume = 4 * Math.PI * radius() * radius() * radius() / 3;
+        double volume = 4 * Math.PI * Math.pow(radius(), 3) / 3;
         return volume;
     }
 }
