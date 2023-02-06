@@ -5,12 +5,14 @@ class Sphere {
 
     // Method to set the diameter of the sphere
     public void setDiameter(double diameter) {
+        // Uses built-in "this" keyword to differentiate the class variable
+        // from the local variable even though they have the same name
         this.diameter = diameter;
     }
 
     // Method to get the radius of the sphere
     public double radius() {
-        double radius = diameter / 2;
+        double radius = diameter / 2; // Radius formula
         return radius;
     }
 
@@ -21,13 +23,13 @@ class Sphere {
 
     // Method to get the surface area of the sphere
     public double surfaceArea() {
-        double surfaceArea = 4 * Math.PI * Math.pow(radius(), 2);
+        double surfaceArea = 4 * Math.PI * Math.pow(radius(), 2); // Surface Area formula
         return surfaceArea;
     }
 
     // Method to get the volume of the sphere
     public double volume() {
-        double volume = 4 * Math.PI * Math.pow(radius(), 3) / 3;
+        double volume = 4 * Math.PI * Math.pow(radius(), 3) / 3; // Volume formula
         return volume;
     }
 }
