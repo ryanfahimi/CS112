@@ -1,39 +1,39 @@
 // Class to represent a sphere with methods to calculate its properties
 class Sphere {
     // Class variable to store the diameter of the sphere
-    double diameter;
+    private double diameter;
 
     // Method to set the diameter of the sphere
-    void setDiameter(double input) {
-        diameter = input;
+    public void setDiameter(double diameter) {
+        this.diameter = diameter;
     }
 
     // Method to get the radius of the sphere
-    double radius() {
+    public double radius() {
         double radius = diameter / 2;
         return radius;
     }
 
     // Method to get the diameter of the sphere
-    double diameter() {
+    public double diameter() {
         return diameter;
     }
 
     // Method to get the surface area of the sphere
-    double surfaceArea() {
+    public double surfaceArea() {
         double surfaceArea = 4 * Math.PI * Math.pow(radius(), 2);
         return surfaceArea;
     }
 
     // Method to get the volume of the sphere
-    double volume() {
+    public double volume() {
         double volume = 4 * Math.PI * Math.pow(radius(), 3) / 3;
         return volume;
     }
 }
 
 // Class to store main method
-class SphereInfo {
+public class SphereInfo {
     public static void main(String[] args) {
         // Create three objects of type Sphere
         Sphere smallSphere = new Sphere();
