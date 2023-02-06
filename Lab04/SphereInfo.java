@@ -4,13 +4,14 @@ class Sphere {
     double diameter;
 
     // Method to set the diameter of the sphere
-    void setDiameter(double diameter) {
-        this.diameter = diameter;
+    void setDiameter(double input) {
+        diameter = input;
     }
 
     // Method to get the radius of the sphere
     double radius() {
-        return diameter / 2;
+        double radius = diameter / 2;
+        return radius;
     }
 
     // Method to get the diameter of the sphere
@@ -20,12 +21,14 @@ class Sphere {
 
     // Method to get the surface area of the sphere
     double surfaceArea() {
-        return 4 * Math.PI * radius() * radius();
+        double surfaceArea = 4 * Math.PI * radius() * radius();
+        return surfaceArea;
     }
 
     // Method to get the volume of the sphere
     double volume() {
-        return 4 * Math.PI * radius() * radius() * radius() / 3;
+        double volume = 4 * Math.PI * radius() * radius() * radius() / 3;
+        return volume;
     }
 }
 
