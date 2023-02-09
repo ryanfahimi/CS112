@@ -22,9 +22,9 @@ public class Plagiarism {
         }
 
         // Get the percentage of the words that are "the"
-        System.out.println("Percentage of THE words is " + instance.getThePercentage());
+        System.out.println("Percentage of THE words is " + instance.getPercentageOfThe());
         // Get the percentage of the words that are "a" or "an"
-        System.out.println("Percentage of A or AN words is " + instance.getAOrAnPercentage());
+        System.out.println("Percentage of A or AN words is " + instance.getPercentageofAOrAn());
     }
 }
 
@@ -32,9 +32,9 @@ class WordCounter {
     // Total number of words in the input string
     private int totalWords = 0;
     // Total number of words that are "the"
-    private int theCount = 0;
+    private int countOfThe = 0;
     // Total number of words that are "a" or "an"
-    private int aOrAnCount = 0;
+    private int countOfAOrAn = 0;
 
     // Method to count a word
     public void countWord(String word) {
@@ -44,22 +44,24 @@ class WordCounter {
         // Check if the word is "the"
         if (word.equals("the")) {
         // Increment the count of "the" words
-        theCount++;
+        countOfThe++;
         } else if (word.equals("a") || word.equals("an")) {
         // Increment the count of "a" or "an" words
-        aOrAnCount++;
+        countOfAOrAn++;
         }
     }
 
     // Method to get the percentage of "the" words in the input string
-    public int getThePercentage() {
+    public int getPercentageOfThe() {
         // Calculate the percentage of "the" words
-        return (theCount * 100) / totalWords;
+        int percentageOfThe = (countOfThe * 100) / totalWords;
+        return percentageOfThe;
     }
 
     // Method to get the percentage of "a" or "an" words in the input string
-    public int getAOrAnPercentage() {
+    public int getPercentageofAOrAn() {
         // Calculate the percentage of "a" or "an" words
-        return (aOrAnCount * 100) / totalWords;
+        int percentageOfAOrAn = (countOfAOrAn * 100) / totalWords;
+        return percentageOfAOrAn;
     }
 }
