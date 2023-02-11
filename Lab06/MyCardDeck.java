@@ -179,53 +179,53 @@ class Card {
 
 class Deck {
     // A deck of playing cards consists of 52 cards in total, one for each suit and value combination
-    Card deck[] = new Card[52]; // Instantiate a deck of 52 playing cards
-    private int cardsLeft = deck.length; // Initialize the instance variable 'cardsLeft' for the deal and shuffle methods
+    Card cardDeck[] = new Card[52]; // Instantiate a deck of 52 playing cards
+    private int cardsLeft = cardDeck.length; // Initialize the instance variable 'cardsLeft' for the deal and shuffle methods
 
     public Deck() {
         int index = 0;
         // Create an array of 4 suits to represent the suits of the playing cards
         String[] suits = {"S", "H", "C", "D"};
-        // Iterate through each card value from 2 to 14 and assign a unique card with each value to each index in the deck array
+        // Iterate through each card value from 2 to 14 and assign a unique card with each value to each index in the cardDeck array
         for (int value = 2; value <= 14; value++) {
-            // Iterate through each card suit and assign a unique card with each suit to each index in the deck array
+            // Iterate through each card suit and assign a unique card with each suit to each index in the cardDeck array
             for (String suit : suits) {
-                // Create a new card instance with the current value and suit and assign it to the current index in the deck array
-                deck[index++] = new Card(value, suit);
+                // Create a new card instance with the current value and suit and assign it to the current index in the cardDeck array
+                cardDeck[index++] = new Card(value, suit);
             }
         }
     }
 
     // Create a string representation of the entire deck of cards
     public String print() {
-        String deck = "";
-        // Loop through each card in the deck array and add its string representation to the deck string
-        for (Card card : this.deck) {
-            deck += card.print() + " ";
+        String cardDeck = "";
+        // Loop through each card in the cardDeck array and add its string representation to the cardDeck string
+        for (Card card : this.cardDeck) {
+            cardDeck += card.print() + " ";
         }
-        // Return the final deck string
-        return deck;
+        // Return the final cardDeck string
+        return cardDeck;
     }
 
     // Utilize the Fisher-Yates shuffle algorithm to arrange all the cards in the deck randomly with an equal chance for every permutation
     public void shuffle() {
-        // Iterate 'current' from the length of deck down to 1 to represent the index of the current card in the deck array
-        for (int current = deck.length - 1; current > 0; current--) {
-            // Set 'random' to a random integer in the range [1,current] to represent the index of a random card in a subset of the deck array
+        // Iterate 'current' from the length of the cardDeck array down to 1 to represent the index of the current card in the cardDeck array
+        for (int current = cardDeck.length - 1; current > 0; current--) {
+            // Set 'random' to a random integer in the range [1,current] to represent the index of a random card in a subset of the cardDeck array
             int random = (int) (Math.random() * (current + 1));
-            // Swap the two cards in the deck
-            Card temp = deck[current];
-            deck[current] = deck[random];
-            deck[random] = temp;
+            // Swap the two cards in the cardDeck
+            Card temp = cardDeck[current];
+            cardDeck[current] = cardDeck[random];
+            cardDeck[random] = temp;
         }
         // Reset 'cardsLeft' instance variable to enable dealing
-        cardsLeft = deck.length;
+        cardsLeft = cardDeck.length;
     }
 
     // Deal one card from the deck
     public Card deal() {
         if (cardsLeft > 0) {
-            return deck[--cardsLeft];
+            return cardDeck[--cardsLeft];
         // If all the cards have been dealt, return an error card
         } else {
             return new Card(0, "ERROR");
