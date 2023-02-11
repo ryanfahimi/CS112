@@ -244,15 +244,15 @@ public class MyCardDeck {
             System.out.println(myCard.print());
         } else {
             // If the user does not provide an argument, create a new Deck object
-            Deck myDeck = new Deck();
+            Deck myCardDeck = new Deck();
             // Print the deck of cards in string format
-            System.out.println(myDeck.print());
+            System.out.println(myCardDeck.print());
 
             //Card myCard = new Card("10", "spades"); System.out.println(myCard.print()); // Third constructor test
-            //myDeck.shuffle();System.out.println(myDeck.print()); // shuffle() test
-            //System.out.println(myDeck.deal().print()); // deal() test
-            //for (int i=0; i<53; i++) {System.out.println(myDeck.deal().print());} // deal() limit test
-            //for (int i=0; i<53; i++) {System.out.println(myDeck.deal().print());} myDeck.shuffle(); for (int i=0; i<53; i++) {System.out.println(myDeck.deal().print());} // deal() limit + shuffle() test
+            //myCardDeck.shuffle();System.out.println(myCardDeck.print()); // shuffle() test
+            //System.out.println(myCardDeck.deal().print()); // deal() test
+            //for (int i=0; i<53; i++) {System.out.println(myCardDeck.deal().print());} // deal() limit test
+            //for (int i=0; i<53; i++) {System.out.println(myCardDeck.deal().print());} myCardDeck.shuffle(); for (int i=0; i<53; i++) {System.out.println(myCardDeck.deal().print());} // deal() limit + shuffle() test
         }
     }
 }
