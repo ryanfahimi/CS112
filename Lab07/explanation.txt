@@ -1,11 +1,8 @@
-The output of the program demonstrates the difference between referencing mutable and immutable objects in Java.
+The difference in behavior between the Integer and MyInt classes is due to their mutability.
 
-Java's Integer class is immutable, meaning its value cannot be changed once it is created.
-In the FunWithInteger function, Integer objects are passed by value, meaning that when 'x' is passed as an argument to DoubleMe, a new Integer object is created with the doubled value.
-However, the original 'x' remains unchanged.
-Changes to the Integer object passed as an argument or within its own functions are not reflected in the original Integer object because the function variable references a new memory address of a copy of the object.
+Since Integer objects 'x' are immutable, their values cannot be modified in place.
+Each operation that modifies the value 'DoubleMe(x)' creates a new object.
+If the new Integer object is not assigned to a variable, the value is effectively discarded after a single use.
 
-Our MyInt class is mutable, meaning its stored values are allowed to change.
-In the FunWithMyInt function, MyInt objects are passed by reference.
-When a MyInt object 'x' is passed as an argument to the DoubleMe method, the value of m_value in x is doubled.
-Changes to the myInt object passed as an argument or within its own functions are reflected in the original MyInt object because the function variable references the memory address of the original object.
+In contrast, MyInt objects 'y' are mutable. 
+Their values can be modified in place by their member functions 'y.DoubleMe()'.
