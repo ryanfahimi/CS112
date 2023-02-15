@@ -10,7 +10,7 @@ class Card {
             // Assigns the value of the parameter 'value' to the instance variable 'value'
             this.value = value;
             // Assigns the value of the parameter 'suit' to the instance variable 'suit'
-            this.suit = suit.substring(0,1);
+            this.suit = suit.substring(0,1).toUpperCase();
         // If the card is not valid
         } else {
             // Assign 0 to the value class variable
