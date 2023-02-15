@@ -1,9 +1,11 @@
-The output of the program demonstrates the difference between objects passed by value and reference in Java.
-In the FunWithInteger function, Integer objects are passed by value, meaning that a new Integer object is created with the doubled value when 'x' is passed as an argument to DoubleMe.
-However, the original 'x' remains unchanged.
-Java's Integer class is immutable, meaning its value cannot be changed once it is created.
+The output of the program demonstrates the difference between referencing mutable and immutable objects in Java.
 
+Java's Integer class is immutable, meaning its value cannot be changed once it is created.
+In the FunWithInteger function, Integer objects are passed by value, meaning that when 'x' is passed as an argument to DoubleMe, a new Integer object is created with the doubled value.
+However, the original 'x' remains unchanged.
+Changes to the Integer object passed as an argument or within its own functions are not reflected in the original Integer object because the function variable references a new memory address of a copy of the object.
+
+Our MyInt class is mutable, meaning its stored values are allowed to change.
 In the FunWithMyInt function, MyInt objects are passed by reference.
 When a MyInt object 'x' is passed as an argument to the DoubleMe method, the value of m_value in x is doubled.
 Changes to the myInt object passed as an argument or within its own functions are reflected in the original MyInt object because the function variable references the memory address of the original object.
-Our MyInt class is mutable, meaning its stored values are allowed to change.
