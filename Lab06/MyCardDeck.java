@@ -185,7 +185,7 @@ class Deck {
     public Deck() {
         int index = 0;
         // Create an array of 4 suits to represent the suits of the playing cards
-        String[] suits = {"S", "H", "C", "D"};
+        String[] suits = {"Spades", "Hearts", "Clubs", "Diamonds"};
         // Iterate through each card value from 2 to 14 and assign a unique card with each value to each index in the cardDeck array
         for (int value = 2; value <= 14; value++) {
             // Iterate through each card suit and assign a unique card with each suit to each index in the cardDeck array
