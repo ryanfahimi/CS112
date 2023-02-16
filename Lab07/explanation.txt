@@ -5,4 +5,4 @@ Each operation that modifies the value 'DoubleMe(x)' creates a new object.
 If the new Integer object is not assigned to a variable, the value is effectively discarded after a single use.
 
 In contrast, MyInt objects 'y' are mutable. 
-Their values can be modified in place by their member functions 'y.DoubleMe()'.
+Their values can be modified in place by their member functions 'y.DoubleMe()' without creating a new object.
