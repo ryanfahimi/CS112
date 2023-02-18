@@ -1,8 +1,23 @@
-The difference in behavior between the Integer and MyInt classes is due to their mutability.
+In the 'FunWithInteger()' function, two 'Integer' objects 'x' and 'y' are initialized and assigned the value '1'.
+Since 'Integer' objects are immutable, the 'DoubleMe(Integer arg)' function cannot modify the original value of 'x', but instead returns a new value.
+In the first call to 'DoubleMe(x)', the value of 'x' remains unchanged, and the returned value is not assigned to anything, so it is effectively discarded.
+In the second call to 'DoubleMe(x)', the returned value is assigned to 'y', so the value of 'y' becomes '2', while the value of 'x' remains '1'.
+In the third call to 'DoubleMe(y)', the returned value of '4' is assigned to 'x', so the value of 'x' becomes '4', while the value of 'y' remains '2'.
+Finally, in the fourth call to 'DoubleMe(x)', the returned value of '8' is assigned to 'x', so the value of 'x' becomes '8', while the value of 'y' remains '2'.
 
-Since Integer objects 'x' are immutable, their values cannot be modified in place.
-Each operation that modifies the value 'DoubleMe(x)' creates a new object.
-If the new Integer object is not assigned to a variable, the value is effectively discarded after a single use.
+In the 'FunWithMyInt()' function, two 'MyInt' objects 'x' and 'y' are initialized and assigned the value '1'.
+Since 'MyInt' objects are mutable, the member functions can modify the 'm_value' of the objects.
+In the first call to 'x.DoubleMe()', the m_value of 'x' becomes '2', while the 'm_value' of 'y' remains '1'.
+In the second call to 'y.set(x.DoubleMe())', the 'm_value' of 'x' becomes '4'.
+This value is then set as the 'm_value' of 'y', so the 'm_value' of 'y' becomes '4' 
+In the third call to 'y.DoubleMe(x)', the 'DoubleMe(MyInt arg)' function is called on the 'x' object, which doubles its 'm_value' and returns '8'.
+This value is then set as the 'm_value' of 'y', so the 'm_value' of 'y' becomes '8'.
+At this point, the m_value of 'x' is '8'.
+In the fourth call to 'x.set(x.DoubleMe(x))', the 'DoubleMe(MyInt arg)' function is called on the 'x' object again, which doubles its 'm_value' and returns '16'.
+This value is then redundantly set as the 'm_value' of 'x', so the 'm_value' of 'x' remains '16'.
+In the final call to 'y.DoubleMe()', the 'm_value' of 'y' is doubled, so it becomes '16'.
 
-In contrast, MyInt objects 'y' are mutable. 
-Their values can be modified in place by their member functions 'y.DoubleMe()' without creating a new object.
+In summary, the difference in behavior between the 'Integer' and 'MyInt' classes is due to their mutability.
+Since 'Integer' objects are immutable, their values cannot be modified in place, so each operation that modifies the value creates a new object.
+On the other hand, since 'MyInt' objects are mutable, their values can be modified in place by their member functions.
+As a result, the operations performed on 'MyInt' objects modify the values of the objects themselves, while the operations performed on 'Integer' objects create new objects with modified values.
