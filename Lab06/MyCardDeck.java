@@ -222,7 +222,7 @@ class Deck {
     public void shuffle() {
         // Iterate 'current' from the length of the cardDeck array down to 1 to represent the index of the current card in the cardDeck array
         for (int current = cardDeck.length - 1; current > 0; current--) {
-            // Set 'random' to a random integer in the range [1,current] to represent the index of a random card in a subset of the cardDeck array
+            // Set 'random' to a random integer in the range [0,current] to represent the index of a random card in a subset of the cardDeck array
             int random = (int) (Math.random() * (current + 1));
             // Swap the two cards in the cardDeck
             Card temp = cardDeck[current];
