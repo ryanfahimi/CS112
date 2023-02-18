@@ -4,9 +4,9 @@ class Card {
     private int value; // Holds the value of the card
     private String suit; // Holds the suit of the card
 
-    // Constructor that sets the value and suit of the card
+    // This constructor creates a card based on the 'value' int parameter and 'suit' string parameter
     public Card(int value, String suit) {
-        if (isValidNumber(value) && isValidSuit(suit.charAt(0))) {
+        if (isValidValue(value) && isValidSuit(suit.charAt(0))) {
             // Assigns the value of the parameter 'value' to the instance variable 'value'
             this.value = value;
             // Assigns the value of the parameter 'suit' to the instance variable 'suit'
@@ -20,7 +20,7 @@ class Card {
         }
     }
 
-    // Constructor that creates a card based on a string representation of a card
+    // This constructor creates a card based on the 'card' string parameter
     public Card(String card) {
         // Initialize a boolean variable to keep track of if the input string is a valid card
         boolean isValidCard = false;
@@ -28,7 +28,7 @@ class Card {
         String value = "";
 
         // Check if the first character of the parameter 'card' is a valid number or letter and the second character of the parameter 'card' is a valid suit
-        if ((isValidNumber(card.charAt(0)) || isValidLetter(card.charAt(0))) && (isValidSuit(card.charAt(1)))) {
+        if (isValidValue(card.charAt(0)) && (isValidSuit(card.charAt(1)))) {
             // If both checks pass, assign the first character of the parameter 'card' to the value variable
             value = card.substring(0, 1);
             // Assign the second character of the parameter 'card' converted to uppercase to the instance variable 'suit'
@@ -106,15 +106,30 @@ class Card {
         }
     }
 
+
     // A helper method that checks if a given character is a valid number card value
     private boolean isValidNumber(char value) {
         return '2' <= value && value <= '9';
     }
 
+
+    // A helper method that checks if a given character is a valid letter card value
+    private boolean isValidLetter(char value) {
+        return "JQKAjqka".indexOf(value) != -1;
+    }
+
+
+    // A helper method that checks if a given character is a valid card value
+    private boolean isValidValue(char value) {
+        return isValidNumber(value) || isValidLetter(value);
+    }
+
+
     // A helper method that checks if a given integer is a valid card value
-    private boolean isValidNumber(int value) {
+    private boolean isValidValue(int value) {
         return 2 <= value && value <= 14;
     }
+
 
     // A helper method that checks if a given string is a valid card value
     private boolean isValidValue(String value) {
@@ -125,10 +140,6 @@ class Card {
         value.equalsIgnoreCase("K") || value.equalsIgnoreCase("A");
     }
 
-    // A helper method that checks if a given character is a valid letter card value
-    private boolean isValidLetter(char value) {
-        return "JQKAjqka".indexOf(value) != -1;
-    }
 
     // A helper method that checks if a given character is a valid card suit
     private boolean isValidSuit(char suit) {
