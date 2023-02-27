@@ -17,7 +17,7 @@ public class Fractions {
         try {
             printWholeNumber(input);
             return;
-        } catch (NumberFormatException nfe) {
+        } catch (NumberFormatException invalidWholeNumber) {
             // Invalid whole number format, so continue
         }
 
@@ -31,7 +31,7 @@ public class Fractions {
                 try {
                     printFraction(fractionParts);
                     return;
-                } catch (NumberFormatException nfe) {
+                } catch (NumberFormatException invalidFraction) {
                     // Invalid simple or improper fraction format, so continue
                 }
             }
@@ -42,7 +42,7 @@ public class Fractions {
                 try {
                     printMixedNumber(inputParts, mixedNumberFractionParts);
                     return;
-                } catch (NumberFormatException nfe) {
+                } catch (NumberFormatException invalidMixedNumber) {
                     // Invalid mixed number format, so continue
                 }
             }
