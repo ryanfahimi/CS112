@@ -1,7 +1,7 @@
 public class Fractions {
     // Constants for the program
     private static final int EXPECTED_ARGS_COUNT = 1;
-    private static final String WHITESPACE_DELIMITER = "\\s+"; // Initialize to regex expression that represents all whitespace
+    private static final String WHITESPACE_DELIMITER = "\\s+"; // Initialize to regular expression that represents all whitespace
     private static final String SLASH_DELIMITER = "/";
 
     public static void main(String[] args) {
@@ -17,7 +17,7 @@ public class Fractions {
         try {
             printWholeNumber(input);
             return;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException nfe) {
             // Invalid whole number format, so continue
         }
 
@@ -31,7 +31,7 @@ public class Fractions {
                 try {
                     printFraction(fractionParts);
                     return;
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException nfe) {
                     // Invalid simple or improper fraction format, so continue
                 }
             }
@@ -42,7 +42,7 @@ public class Fractions {
                 try {
                     printMixedNumber(inputParts, mixedNumberFractionParts);
                     return;
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException nfe) {
                     // Invalid mixed number format, so continue
                 }
             }
