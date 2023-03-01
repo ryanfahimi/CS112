@@ -53,9 +53,8 @@ public class Fractions {
     }
 
     // Method to print a whole number as a decimal
-    private static void printWholeNumber(String wholeNumberString) {
-        double wholeNumber = Double.parseDouble(wholeNumberString);
-        double decimalValue = wholeNumber;
+    private static void printWholeNumber(String wholeNumber) {
+        double decimalValue = Double.parseDouble(wholeNumber);
         System.out.println(decimalValue);
     }
 
