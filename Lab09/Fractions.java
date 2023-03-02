@@ -62,6 +62,9 @@ public class Fractions {
     private static void printFraction(String[] fractionParts) {
         double numerator = Double.parseDouble(fractionParts[0]);
         double denominator = Double.parseDouble(fractionParts[1]);
+        if (denominator < 0) {
+            throw new NumberFormatException("Negative denominator");
+        }
         double decimalValue = numerator / denominator;
         System.out.println(decimalValue);
     }
@@ -71,6 +74,9 @@ public class Fractions {
         double wholeNumber = Double.parseDouble(mixedNumberParts[0]);
         double numerator = Double.parseDouble(mixedNumberFractionParts[0]);
         double denominator = Double.parseDouble(mixedNumberFractionParts[1]);
+        if (numerator < 0 || denominator < 0) {
+            throw new NumberFormatException("Negative numerator or denominator");
+        }
         double decimalValue = numerator / denominator;
         // Convert mixed number to improper fraction and calculate decimal value
         decimalValue = (wholeNumber < 0) ? (wholeNumber - decimalValue) : (wholeNumber + decimalValue);
