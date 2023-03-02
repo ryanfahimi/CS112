@@ -21,7 +21,7 @@ public class Cosine {
     }
 
     // Calculates the factorial of a given number
-    public static long factorial(long n) {
+    private static long factorial(long n) {
         if (n < 1) {
             return 1;
         }
@@ -35,7 +35,7 @@ public class Cosine {
     }
 
     // Calculates the power of a given number x to the exponent p
-    public static double power(double x, int p) {
+    private static double power(double x, int p) {
         double result = 1;
         for (int i = 0; i < p; i++) {
             result *= x;
