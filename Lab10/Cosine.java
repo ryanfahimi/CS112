@@ -12,7 +12,7 @@ public class Cosine {
             System.out.println("Cosine of " + input + " is " + cosine);
 
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("ERROR: No input");
+            System.err.println("ERROR: Zero arguments");
 
         } catch (NumberFormatException e) {
             System.err.println("ERROR: Input is not a number");
