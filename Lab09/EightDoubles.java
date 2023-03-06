@@ -38,9 +38,9 @@ public class EightDoubles {
             double roundedAverage = ((int) (100 * average)) * 0.01;
         
             // Output the minimum, maximum, and rounded average values
-            System.out.println("Minimum: " + min);
-            System.out.println("Maximum: " + max);
-            System.out.println("Average: " + roundedAverage);
+            System.out.println("Minimum " + min);
+            System.out.println("Maximum " + max);
+            System.out.println("Average " + roundedAverage);
 
         } catch (NoSuchElementException exception) {
             // Catch an error if the user inputs fewer than eight doubles
