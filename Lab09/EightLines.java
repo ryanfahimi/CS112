@@ -5,7 +5,7 @@ public class EightLines {
 
     // Declare constants for the program
     private static final int NUM_INPUTS = 8;
-    private static final String WORD_DELIMITER = "\\s+"; // Initialize to regex expression that represents all whitespace
+    private static final String WORD_DELIMITER = "\\s+"; // Initialize to regular expression that represents all whitespace
 
     public static void main(String[] args) {
     

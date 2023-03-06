@@ -72,6 +72,7 @@ public class Fractions {
     // Method to print a mixed number as a decimal
     private static void printMixedNumber(String[] mixedNumberParts, String[] mixedNumberFractionParts) {
         double wholeNumber = Double.parseDouble(mixedNumberParts[0]);
+        boolean wholeNumberIsNegative = wholeNumber < 0;
         double numerator = Double.parseDouble(mixedNumberFractionParts[0]);
         double denominator = Double.parseDouble(mixedNumberFractionParts[1]);
         if (numerator < 0 || denominator < 0) {
@@ -79,7 +80,7 @@ public class Fractions {
         }
         double decimalValue = numerator / denominator;
         // Convert mixed number to improper fraction and calculate decimal value
-        decimalValue = (wholeNumber < 0) ? (wholeNumber - decimalValue) : (wholeNumber + decimalValue);
+        decimalValue = (wholeNumberIsNegative) ? (wholeNumber - decimalValue) : (wholeNumber + decimalValue);
         System.out.println(decimalValue);
     }
 }
