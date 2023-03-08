@@ -16,7 +16,7 @@ public class EightLines {
             for (int lineCounter = 0; lineCounter < NUM_INPUTS; lineCounter++) {
 
                 // Read in a line of input from the user
-                String line = scanner.nextLine();
+                String line = scanner.nextLine().trim();
 
                 // Check if the line is blank
                 if (line.isEmpty()) {
