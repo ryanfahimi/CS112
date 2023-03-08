@@ -11,7 +11,7 @@ public class EightDoubles {
         // Declare variables for the sum, minimum, and maximum
         double sum = 0;
         double min = Double.MAX_VALUE; // Initialize to maximum double value so the next scanned double will be smaller or equal
-        double max = Double.MIN_VALUE; // Initialize to minimum double value so the next scanned double will be larger or equal
+        double max = Double.NEGATIVE_INFINITY; // Initialize to minimum double value so the next scanned double will be larger or equal
         
         // Utilize try-with-resources block to automatically close the scanner after use
         try (Scanner scanner = new Scanner(System.in)) {

@@ -18,6 +18,12 @@ public class EightLines {
                 // Read in a line of input from the user
                 String line = scanner.nextLine();
 
+                // Check if the line is blank
+                if (line.isEmpty()) {
+                    // Skip this line and continue to the next iteration of the loop
+                    continue;
+                }
+
                 // Split the input line into an array of words
                 String[] words = line.split(WORD_DELIMITER);
 
