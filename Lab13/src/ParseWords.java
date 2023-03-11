@@ -35,7 +35,7 @@ public class ParseWords {
         }
 
         for (String word : words) {
-            if (word.equals("")) {
+            if (word.isEmpty()) {
                 System.out.println("BLANK");
             } else {
                 System.out.println(word);
