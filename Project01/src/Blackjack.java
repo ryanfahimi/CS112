@@ -10,183 +10,16 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- * The Card class represents a playing card with a rank and suit.
+ * The BlackjackHand class represents a hand of playing cards in Blackjack.
  */
-class Card {
-    private Rank rank;
-    private Suit suit;
-
-    /**
-     * The Rank enumeration defines the 13 possible card ranks in a standard 52-card
-     * deck.
-     */
-    private enum Rank {
-        TWO("2", 2), THREE("3", 3), FOUR("4", 4), FIVE("5", 5), SIX("6", 6), SEVEN("7", 7), EIGHT("8", 8), NINE("9", 9),
-        TEN("10", 10), JACK("J", 10), QUEEN("Q", 10), KING("K", 10), ACE("A", 10);
-
-        private final String rank;
-        private final int value;
-
-        /**
-         * Constructor for the Rank enumeration.
-         *
-         * @param rank  The rank as a string.
-         * @param value The rank as an int.
-         */
-        Rank(String rank, int value) {
-            this.rank = rank;
-            this.value = value;
-        }
-
-        /**
-         * Returns the rank as a string.
-         *
-         * @return The rank as a string.
-         */
-        public String getRank() {
-            return rank;
-        }
-
-        /**
-         * Returns the value of the rank as an int.
-         *
-         * @return The rank value as an int.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Returns the Rank enumeration that matches the given string.
-         *
-         * @param rankString The rank as a string.
-         * @return The corresponding Rank enumeration, or null if no match is found.
-         */
-        public static Rank fromString(String rankString) {
-            for (Rank rank : Rank.values()) {
-                if (rank.getRank().equals(rankString)) {
-                    return rank;
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
-     * The Suit enumeration defines the 4 possible card suits in a standard 52-card
-     * deck.
-     */
-    private enum Suit {
-        SPADES("S"), HEARTS("H"), DIAMONDS("D"), CLUBS("C");
-
-        private final String suit;
-
-        /**
-         * Constructor for the Suit enumeration.
-         *
-         * @param suit The suit as a string.
-         */
-        Suit(String suit) {
-            this.suit = suit;
-        }
-
-        /**
-         * Returns the suit as a string.
-         *
-         * @return The suit as a string.
-         */
-        public String getSuit() {
-            return suit;
-        }
-
-        /**
-         * Returns the Suit enumeration that matches the given string.
-         *
-         * @param suitString The suit as a string.
-         * @return The corresponding Suit enumeration, or null if no match is found.
-         */
-        public static Suit fromString(String suitString) {
-            for (Suit suit : Suit.values()) {
-                if (suit.getSuit().equals(suitString)) {
-                    return suit;
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
-     * Constructs a Card object given a card string in the format "rank + suit".
-     *
-     * @param card The card string in the format "rank + suit".
-     * @throws IllegalArgumentException If the card string is invalid.
-     */
-    public Card(String card) throws IllegalArgumentException {
-        Object[] parsedCard = parseCard(card);
-        if (parsedCard != null) {
-            this.rank = (Rank) parsedCard[0];
-            this.suit = (Suit) parsedCard[1];
-        } else {
-            throw new IllegalArgumentException("Invalid card format: " + card);
-        }
-    }
-
-    // Getters
-
-    public String getRank() {
-        return rank.getRank();
-    }
-
-    public int getValue() {
-        return rank.getValue();
-    }
-
-    public String getSuit() {
-        return suit.getSuit();
-    }
-
-    @Override
-    public String toString() {
-        return rank.getRank() + suit.getSuit();
-    }
-
-    /**
-     * Parses the card string to extract the rank and suit.
-     *
-     * @param card The card string in the format "rank + suit"
-     * @return An object array containing the rank and suit, or null if the format
-     *         is
-     *         invalid
-     * @throws IllegalArgumentException If the card string is null or empty
-     */
-    private Object[] parseCard(String card) throws IllegalArgumentException {
-        if (card == null || card.isEmpty()) {
-            throw new IllegalArgumentException("Null or empty card string");
-        }
-        for (int i = 1; i <= 2; i++) {
-            String rankString = card.substring(0, i).toUpperCase();
-            String suitString = card.substring(i).toUpperCase();
-            Rank rank = Rank.fromString(rankString);
-            Suit suit = Suit.fromString(suitString);
-            if (rank != null && suit != null) {
-                return new Object[] { rank, suit };
-            }
-        }
-        return null;
-    }
-}
-
-/**
- * The Hand class represents a hand of playing cards in Blackjack.
- */
-class Hand {
+class BlackjackHand {
     private Card[] hand;
     private int numCards;
 
     /**
      * Constructs an empty Hand object.
      */
-    public Hand() {
+    public BlackjackHand() {
         hand = new Card[11]; // Maximum 11 cards in a blackjack hand
         numCards = 0;
     }
@@ -212,8 +45,8 @@ class Hand {
 
         for (int i = 0; i < numCards; i++) {
             Card card = hand[i];
-            int cardValue = card.getValue();
-            if (card.getRank().equals("A")) {
+            int cardValue = card.getRankInt();
+            if (card.getRankString().equals("A")) {
                 numAces++;
             }
             value += cardValue;
@@ -307,14 +140,14 @@ public class Blackjack {
      * @param hand         The player's current hand
      * @throws IOException If an I/O error occurs
      */
-    public void play(Card dealerUpcard, Hand hand) throws IOException {
+    public void play(Card dealerUpcard, AceyHand hand) throws IOException {
         int numCards = hand.getNumCards();
         int handValue = hand.getValue();
         Card[] cards = hand.getHand();
-        int dealerUpcardValue = dealerUpcard.getValue();
+        int dealerUpcardValue = dealerUpcard.getRankInt();
 
         // Check for split
-        if (numCards == 2 && cards[0].getRank().equals(cards[1].getRank())) {
+        if (numCards == 2 && cards[0].getRankString().equals(cards[1].getRankString())) {
             write("split");
         } // Check for double down
         else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
@@ -330,13 +163,13 @@ public class Blackjack {
     /**
      * Handles the login process with the provided message parts.
      *
-     * @param parts The message parts containing the login information
+     * @param commandParts The message parts containing the login information
      * @throws IOException              If an error occurs while writing the login
      *                                  message
      * @throws IllegalArgumentException If the login message format is invalid
      */
-    private void handleLogin(String[] parts) throws IOException, IllegalArgumentException {
-        if (parts.length < 2) {
+    private void handleLogin(String[] commandParts) throws IOException, IllegalArgumentException {
+        if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid login message format");
         }
         write("rfahimi:21Savage");
@@ -345,114 +178,116 @@ public class Blackjack {
     /**
      * Handles the bet placing process with the provided message parts.
      *
-     * @param parts The message parts containing the bet information
+     * @param commandParts The message parts containing the bet information
      * @throws IOException              If an error occurs while writing the bet
      *                                  message
      * @throws IllegalArgumentException If the bet message format is invalid
      */
-    private void handleBet(String[] parts) throws IOException, IllegalArgumentException {
-        if (parts.length < 2) {
+    private void handleBet(String[] commandParts) throws IOException, IllegalArgumentException {
+        if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid bet message format");
         }
         int bankroll;
         try {
-            bankroll = Integer.parseInt(parts[1]);
+            bankroll = Integer.parseInt(commandParts[1]);
+            write("bet:" + getBetAmount(bankroll));
         } catch (NumberFormatException e) {
-            System.err.println("ERROR: Unable to initialize bankroll: Bankroll value is not an int: " + parts[1]);
-            return;
+            System.err
+                    .println("ERROR: Unable to initialize bankroll: Bankroll value is not an int: " + commandParts[1]);
+            System.exit(1);
         }
-        write("bet:" + getBetAmount(bankroll));
     }
 
     /**
      * Handles the play process with the provided message parts.
      *
-     * @param parts The message parts containing the play information
+     * @param commandParts The message parts containing the play information
      * @throws IOException              If an error occurs while playing
      * @throws IllegalArgumentException If the play message format is invalid
      */
-    private void handlePlay(String[] parts) throws IOException, IllegalArgumentException {
-        if (parts.length < 3) {
+    private void handlePlay(String[] commandParts) throws IOException, IllegalArgumentException {
+        if (commandParts.length < 3) {
             throw new IllegalArgumentException("Invalid play message format");
         }
         Card dealerUpCard;
-        Hand hand = new Hand();
+        AceyHand hand = new AceyHand();
         try {
-            dealerUpCard = new Card(parts[2]);
-            for (int i = 4; i < parts.length; i++) {
-                hand.addCard(new Card(parts[i]));
+            dealerUpCard = new Card(commandParts[2]);
+            for (int i = 4; i < commandParts.length; i++) {
+                hand.addCard(new Card(commandParts[i]));
             }
+            play(dealerUpCard, hand);
         } catch (IllegalArgumentException e) {
             System.err.println("ERROR: Unable to initialize card: " + e.getMessage());
-            return;
+            System.exit(1);
         }
-        play(dealerUpCard, hand);
     }
 
     /**
      * Handles the status display process with the provided message parts.
      *
-     * @param parts The message parts containing the status information
+     * @param commandParts The message parts containing the status information
      * @throws IllegalArgumentException If the status message format is invalid
      */
-    private void handleStatus(String[] parts) throws IllegalArgumentException {
-        if (parts.length < 6) {
+    private void handleStatus(String[] commandParts) throws IllegalArgumentException {
+        if (commandParts.length < 6) {
             throw new IllegalArgumentException("Invalid status message format");
         }
-        System.out.println("Result: " + parts[1] + " | Dealer score: " + parts[3] + " | Your score: " + parts[5]);
+        System.out.println("Result: " + commandParts[1] + " | Dealer score: " + commandParts[3] + " | Your score: "
+                + commandParts[5]);
     }
 
     /**
      * Handles the completion of the game with the provided message parts.
      *
-     * @param parts The message parts containing the completion information
+     * @param commandParts The message parts containing the completion information
      * @throws IllegalArgumentException If the done message format is invalid
      */
-    private void handleDone(String[] parts) throws IllegalArgumentException {
-        if (parts.length < 2) {
+    private void handleDone(String[] commandParts) throws IllegalArgumentException {
+        if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid done message format");
         }
-        System.out.println("Game over: " + parts[1]);
+        System.out.println("Game over: " + commandParts[1]);
     }
 
     /**
      * Parses and handles commands received from the server.
      */
     public void parseCommand() {
-        String message;
+        String command;
         boolean done = false;
         while (!done) {
             try {
-                message = read();
+                command = read();
             } catch (IOException e) {
                 System.err.println("ERROR: Unable to read from the server: " + e.getMessage());
                 return;
             }
-            String[] parts = message.split(":");
-            String command = parts[0];
+            String[] commandParts = command.split(":");
+            command = commandParts[0];
 
             try {
                 switch (command) {
                     case "login":
-                        handleLogin(parts);
+                        handleLogin(commandParts);
                         break;
 
                     case "bet":
-                        // handleBet(parts);
+                        // handleBet(commandParts);
                         write("bet:1");
                         break;
 
                     case "play":
-                        // handlePlay(parts);
+                        // handlePlay(commandParts);
                         write("stand");
                         break;
 
                     case "status":
-                        handleStatus(parts);
+                        handleStatus(commandParts);
                         break;
 
                     case "done":
-                        handleDone(parts);
+                        handleDone(commandParts);
                         done = true;
                         break;
 
@@ -477,7 +312,8 @@ public class Blackjack {
     /**
      * The main method that runs the Blackjack client.
      * 
-     * @param args Command line arguments containing the IP address and port number
+     * @param args Command line arguments containing the IP address and IP port
+     *             number
      */
     public static void main(String[] args) {
         String ipAddress;

@@ -4,176 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
 /**
- * The Card class represents a playing card with a rank and suit.
+ * The Acey Hand class represents a hand of playing cards in Acey.
  */
-class Card {
-    private Rank rank;
-    private Suit suit;
-
-    /**
-     * The Rank enumeration defines the 13 possible card ranks in a standard 52-card
-     * deck.
-     */
-    private enum Rank {
-        TWO("2", 2), THREE("3", 3), FOUR("4", 4), FIVE("5", 5), SIX("6", 6), SEVEN("7", 7), EIGHT("8", 8), NINE("9", 9),
-        TEN("10", 10), JACK("J", 11), QUEEN("Q", 12), KING("K", 13), ACE("A", 14);
-
-        private final String rank;
-        private final int value;
-
-        /**
-         * Constructor for the Rank enumeration.
-         *
-         * @param rank  The rank as a string.
-         * @param value The rank as an int.
-         */
-        Rank(String rank, int value) {
-            this.rank = rank;
-            this.value = value;
-        }
-
-        /**
-         * Returns the rank as a string.
-         *
-         * @return The rank as a string.
-         */
-        public String getRank() {
-            return rank;
-        }
-
-        /**
-         * Returns the value of the rank as an int.
-         *
-         * @return The rank value as an int.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Returns the Rank enumeration that matches the given string.
-         *
-         * @param rankString The rank as a string.
-         * @return The corresponding Rank enumeration, or null if no match is found.
-         */
-        public static Rank fromString(String rankString) {
-            for (Rank rank : Rank.values()) {
-                if (rank.getRank().equals(rankString)) {
-                    return rank;
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
-     * The Suit enumeration defines the 4 possible card suits in a standard 52-card
-     * deck.
-     */
-    private enum Suit {
-        SPADES("S"), HEARTS("H"), DIAMONDS("D"), CLUBS("C");
-
-        private final String suit;
-
-        /**
-         * Constructor for the Suit enumeration.
-         *
-         * @param suit The suit as a string.
-         */
-        Suit(String suit) {
-            this.suit = suit;
-        }
-
-        /**
-         * Returns the suit as a string.
-         *
-         * @return The suit as a string.
-         */
-        public String getSuit() {
-            return suit;
-        }
-
-        /**
-         * Returns the Suit enumeration that matches the given string.
-         *
-         * @param suitString The suit as a string.
-         * @return The corresponding Suit enumeration, or null if no match is found.
-         */
-        public static Suit fromString(String suitString) {
-            for (Suit suit : Suit.values()) {
-                if (suit.getSuit().equals(suitString)) {
-                    return suit;
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
-     * Constructs a Card object given a card string in the format "rank + suit".
-     *
-     * @param card The card string in the format "rank + suit".
-     * @throws IllegalArgumentException If the card string is invalid.
-     */
-    public Card(String card) throws IllegalArgumentException {
-        Object[] parsedCard = parseCard(card);
-        if (parsedCard != null) {
-            this.rank = (Rank) parsedCard[0];
-            this.suit = (Suit) parsedCard[1];
-        } else {
-            throw new IllegalArgumentException("Invalid card format: " + card);
-        }
-    }
-
-    // Getters
-
-    public String getRank() {
-        return rank.getRank();
-    }
-
-    public int getValue() {
-        return rank.getValue();
-    }
-
-    public String getSuit() {
-        return suit.getSuit();
-    }
-
-    @Override
-    public String toString() {
-        return rank.getRank() + suit.getSuit();
-    }
-
-    /**
-     * Parses the card string to extract the rank and suit.
-     *
-     * @param card The card string in the format "rank + suit"
-     * @return An object array containing the rank and suit, or null if the format
-     *         is
-     *         invalid
-     * @throws IllegalArgumentException If the card string is null or empty
-     */
-    private Object[] parseCard(String card) throws IllegalArgumentException {
-        if (card == null || card.isEmpty()) {
-            throw new IllegalArgumentException("Null or empty card string");
-        }
-        for (int i = 1; i <= 2; i++) {
-            String rankString = card.substring(0, i).toUpperCase();
-            String suitString = card.substring(i).toUpperCase();
-            Rank rank = Rank.fromString(rankString);
-            Suit suit = Suit.fromString(suitString);
-            if (rank != null && suit != null) {
-                return new Object[] { rank, suit };
-            }
-        }
-        return null;
-    }
-}
-
-/**
- * The Hand class represents a hand of playing cards in Acey.
- */
-class Hand {
+class AceyHand {
     private Card[] hand;
     private int numCards;
     private int value;
@@ -182,7 +15,7 @@ class Hand {
     /**
      * Constructs an empty Hand object.
      */
-    public Hand() {
+    public AceyHand() {
         hand = new Card[3];
         numCards = 0;
         value = 0;
@@ -195,12 +28,12 @@ class Hand {
      */
     public void addCard(Card card) {
         hand[numCards] = card;
-        value += card.getValue();
+        value += card.getRankInt();
         numCards++;
     }
 
     public int getDifference() {
-        difference = Math.abs(hand[1].getValue() - hand[0].getValue());
+        difference = Math.abs(hand[1].getRankInt() - hand[0].getRankInt());
         return difference;
     }
 
@@ -245,46 +78,61 @@ public class Acey {
         return dis.readUTF();
     }
 
-    private void handlePlay(String[] parts) throws IOException {
+    /**
+     * Handles the login process with the provided message parts.
+     *
+     * @param commandParts The message parts containing the login information
+     * @throws IOException              If an error occurs while writing the login
+     *                                  message
+     * @throws IllegalArgumentException If the login message format is invalid
+     */
+    private void handleLogin(String[] commandParts) throws IOException, IllegalArgumentException {
+        if (commandParts.length < 2) {
+            throw new IllegalArgumentException("Invalid login message format");
+        }
+        write("rfahimi:AceyDoesIt");
+    }
+
+    private void handlePlay(String[] commandParts) throws IOException {
         int bet = 0;
-        String decision = (parts[4] == parts[5]) ? ("high") : ("mid");
+        String decision = (commandParts[4] == commandParts[5]) ? ("high") : ("mid");
         write(decision + ":" + bet);
     }
 
-    private void handleStatus(String[] parts) throws IOException {
+    private void handleStatus(String[] commandParts) throws IOException {
 
     }
 
-    private void handleDone(String[] parts) throws IOException {
+    private void handleDone(String[] commandParts) throws IOException {
 
     }
 
     public void parseCommand() {
-        String message;
+        String command;
         boolean done = false;
         while (!done) {
             try {
-                message = read();
+                command = read();
             } catch (IOException e) {
                 System.err.println("ERROR: Unable to read from the server: " + e.getMessage());
                 return;
             }
-            String[] parts = message.split(":");
-            String command = parts[0];
+            String[] commandParts = command.split(":");
+            command = commandParts[0];
 
             try {
                 switch (command) {
                     case "login":
-                        write("rfahimi:AceyDoesIt");
+                        handleLogin(commandParts);
                         break;
                     case "play":
-                        handlePlay(parts);
+                        handlePlay(commandParts);
                         break;
                     case "status":
-                        handleStatus(parts);
+                        handleStatus(commandParts);
                         break;
                     case "done":
-                        handleDone(parts);
+                        handleDone(commandParts);
                         done = true;
                         break;
                     default:
@@ -306,13 +154,19 @@ public class Acey {
     }
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("Usage: java Acey <ipAddress> <ipPort>");
+        String ipAddress;
+        int ipPort;
+        try {
+            ipAddress = args[0];
+            ipPort = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            System.err.println("ERROR: Unable to initialize IP Port: IP Port is not a number: " + args[1]);
+            return;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println(
+                    "ERROR: Unable to initialize IP address and/or IP Port: Missing IP address and/or IP Port");
             return;
         }
-
-        String ipAddress = args[0];
-        int ipPort = Integer.parseInt(args[1]);
 
         Acey player = new Acey(ipAddress, ipPort);
         player.parseCommand();
