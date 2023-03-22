@@ -45,8 +45,8 @@ class BlackjackHand {
 
         for (int i = 0; i < numCards; i++) {
             Card card = hand[i];
-            int cardValue = card.getRankInt();
-            if (card.getRankString().equals("A")) {
+            int cardValue = card.rank.getInt();
+            if (card.rank.getString().equals("A")) {
                 numAces++;
             }
             value += cardValue;
@@ -144,10 +144,10 @@ public class Blackjack {
         int numCards = hand.getNumCards();
         int handValue = hand.getValue();
         Card[] cards = hand.getHand();
-        int dealerUpcardValue = dealerUpcard.getRankInt();
+        int dealerUpcardValue = dealerUpcard.rank.getInt();
 
         // Check for split
-        if (numCards == 2 && cards[0].getRankString().equals(cards[1].getRankString())) {
+        if (numCards == 2 && cards[0].rank.getString().equals(cards[1].rank.getString())) {
             write("split");
         } // Check for double down
         else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
@@ -212,9 +212,9 @@ public class Blackjack {
         Card dealerUpCard;
         AceyHand hand = new AceyHand();
         try {
-            dealerUpCard = new Card(commandParts[2]);
+            dealerUpCard = Card.fromString(commandParts[2]);
             for (int i = 4; i < commandParts.length; i++) {
-                hand.addCard(new Card(commandParts[i]));
+                hand.addCard(Card.fromString(commandParts[i]));
             }
             play(dealerUpCard, hand);
         } catch (IllegalArgumentException e) {

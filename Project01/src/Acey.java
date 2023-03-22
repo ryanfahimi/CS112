@@ -28,12 +28,12 @@ class AceyHand {
      */
     public void addCard(Card card) {
         hand[numCards] = card;
-        value += card.getRankInt();
+        value += card.rank.getInt();
         numCards++;
     }
 
     public int getDifference() {
-        difference = Math.abs(hand[1].getRankInt() - hand[0].getRankInt());
+        difference = Math.abs(hand[1].rank.getInt() - hand[0].rank.getInt());
         return difference;
     }
 
