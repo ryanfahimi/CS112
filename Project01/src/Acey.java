@@ -11,66 +11,6 @@ class Card {
     private Suit suit;
 
     /**
-     * Constructs a Card object given a card string in the format "rank + suit".
-     *
-     * @param card The card string in the format "rank + suit".
-     * @throws IllegalArgumentException If the card string is invalid.
-     */
-    public Card(String card) throws IllegalArgumentException {
-        Object[] parsedCard = parseCard(card);
-        if (parsedCard != null) {
-            this.rank = (Rank) parsedCard[0];
-            this.suit = (Suit) parsedCard[1];
-        } else {
-            throw new IllegalArgumentException("Invalid card format: " + card);
-        }
-    }
-
-    /**
-     * Parses the card string to extract the rank and suit.
-     *
-     * @param card The card string in the format "rank + suit"
-     * @return An object array containing the rank and suit, or null if the format
-     *         is
-     *         invalid
-     * @throws IllegalArgumentException If the card string is null or empty
-     */
-    private Object[] parseCard(String card) throws IllegalArgumentException {
-        if (card == null || card.isEmpty()) {
-            throw new IllegalArgumentException("Null or empty card string");
-        }
-        for (int i = 1; i <= 2; i++) {
-            String rankString = card.substring(0, i).toUpperCase();
-            String suitString = card.substring(i).toUpperCase();
-            Rank rank = Rank.fromString(rankString);
-            Suit suit = Suit.fromString(suitString);
-            if (rank != null && suit != null) {
-                return new Object[] { rank, suit };
-            }
-        }
-        return null;
-    }
-
-    // Getters
-
-    public String getRank() {
-        return rank.getRank();
-    }
-
-    public int getValue() {
-        return rank.getValue();
-    }
-
-    public String getSuit() {
-        return suit.getSuit();
-    }
-
-    @Override
-    public String toString() {
-        return rank.getRank() + suit.getSuit();
-    }
-
-    /**
      * The Rank enumeration defines the 13 possible card ranks in a standard 52-card
      * deck.
      */
@@ -168,6 +108,66 @@ class Card {
             return null;
         }
     }
+
+    /**
+     * Constructs a Card object given a card string in the format "rank + suit".
+     *
+     * @param card The card string in the format "rank + suit".
+     * @throws IllegalArgumentException If the card string is invalid.
+     */
+    public Card(String card) throws IllegalArgumentException {
+        Object[] parsedCard = parseCard(card);
+        if (parsedCard != null) {
+            this.rank = (Rank) parsedCard[0];
+            this.suit = (Suit) parsedCard[1];
+        } else {
+            throw new IllegalArgumentException("Invalid card format: " + card);
+        }
+    }
+
+    // Getters
+
+    public String getRank() {
+        return rank.getRank();
+    }
+
+    public int getValue() {
+        return rank.getValue();
+    }
+
+    public String getSuit() {
+        return suit.getSuit();
+    }
+
+    @Override
+    public String toString() {
+        return rank.getRank() + suit.getSuit();
+    }
+
+    /**
+     * Parses the card string to extract the rank and suit.
+     *
+     * @param card The card string in the format "rank + suit"
+     * @return An object array containing the rank and suit, or null if the format
+     *         is
+     *         invalid
+     * @throws IllegalArgumentException If the card string is null or empty
+     */
+    private Object[] parseCard(String card) throws IllegalArgumentException {
+        if (card == null || card.isEmpty()) {
+            throw new IllegalArgumentException("Null or empty card string");
+        }
+        for (int i = 1; i <= 2; i++) {
+            String rankString = card.substring(0, i).toUpperCase();
+            String suitString = card.substring(i).toUpperCase();
+            Rank rank = Rank.fromString(rankString);
+            Suit suit = Suit.fromString(suitString);
+            if (rank != null && suit != null) {
+                return new Object[] { rank, suit };
+            }
+        }
+        return null;
+    }
 }
 
 /**
@@ -176,6 +176,8 @@ class Card {
 class Hand {
     private Card[] hand;
     private int numCards;
+    private int value;
+    private int difference;
 
     /**
      * Constructs an empty Hand object.
@@ -183,6 +185,7 @@ class Hand {
     public Hand() {
         hand = new Card[3];
         numCards = 0;
+        value = 0;
     }
 
     /**
@@ -192,7 +195,27 @@ class Hand {
      */
     public void addCard(Card card) {
         hand[numCards] = card;
+        value += card.getValue();
         numCards++;
+    }
+
+    public int getDifference() {
+        difference = Math.abs(hand[1].getValue() - hand[0].getValue());
+        return difference;
+    }
+
+    // Getters
+
+    public int getValue() {
+        return value;
+    }
+
+    public int getNumCards() {
+        return numCards;
+    }
+
+    public Card[] getHand() {
+        return hand;
     }
 
 }
@@ -202,10 +225,15 @@ public class Acey {
     private DataInputStream dis;
     private DataOutputStream dos;
 
-    public Acey(String ipAddress, int ipPort) throws IOException {
-        socket = new Socket(ipAddress, ipPort);
-        dis = new DataInputStream(socket.getInputStream());
-        dos = new DataOutputStream(socket.getOutputStream());
+    public Acey(String ipAddress, int ipPort) {
+        try {
+            socket = new Socket(ipAddress, ipPort);
+            dis = new DataInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            System.err.println("ERROR: Unable to connect to the server: " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     private void write(String s) throws IOException {
@@ -219,11 +247,19 @@ public class Acey {
 
     private void handlePlay(String[] parts) throws IOException {
         int bet = 0;
-        String decision = "mid";
+        String decision = (parts[4] == parts[5]) ? ("high") : ("mid");
         write(decision + ":" + bet);
     }
 
-    public void parseCommand() throws IOException {
+    private void handleStatus(String[] parts) throws IOException {
+
+    }
+
+    private void handleDone(String[] parts) throws IOException {
+
+    }
+
+    public void parseCommand() {
         String message;
         boolean done = false;
         while (!done) {
@@ -278,11 +314,7 @@ public class Acey {
         String ipAddress = args[0];
         int ipPort = Integer.parseInt(args[1]);
 
-        try {
-            Acey player = new Acey(ipAddress, ipPort);
-            player.parseCommand();
-        } catch (IOException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        Acey player = new Acey(ipAddress, ipPort);
+        player.parseCommand();
     }
 }

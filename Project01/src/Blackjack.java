@@ -17,66 +17,6 @@ class Card {
     private Suit suit;
 
     /**
-     * Constructs a Card object given a card string in the format "rank + suit".
-     *
-     * @param card The card string in the format "rank + suit".
-     * @throws IllegalArgumentException If the card string is invalid.
-     */
-    public Card(String card) throws IllegalArgumentException {
-        Object[] parsedCard = parseCard(card);
-        if (parsedCard != null) {
-            this.rank = (Rank) parsedCard[0];
-            this.suit = (Suit) parsedCard[1];
-        } else {
-            throw new IllegalArgumentException("Invalid card format: " + card);
-        }
-    }
-
-    /**
-     * Parses the card string to extract the rank and suit.
-     *
-     * @param card The card string in the format "rank + suit"
-     * @return An object array containing the rank and suit, or null if the format
-     *         is
-     *         invalid
-     * @throws IllegalArgumentException If the card string is null or empty
-     */
-    private Object[] parseCard(String card) throws IllegalArgumentException {
-        if (card == null || card.isEmpty()) {
-            throw new IllegalArgumentException("Null or empty card string");
-        }
-        for (int i = 1; i <= 2; i++) {
-            String rankString = card.substring(0, i).toUpperCase();
-            String suitString = card.substring(i).toUpperCase();
-            Rank rank = Rank.fromString(rankString);
-            Suit suit = Suit.fromString(suitString);
-            if (rank != null && suit != null) {
-                return new Object[] { rank, suit };
-            }
-        }
-        return null;
-    }
-
-    // Getters
-
-    public String getRank() {
-        return rank.getRank();
-    }
-
-    public int getValue() {
-        return rank.getValue();
-    }
-
-    public String getSuit() {
-        return suit.getSuit();
-    }
-
-    @Override
-    public String toString() {
-        return rank.getRank() + suit.getSuit();
-    }
-
-    /**
      * The Rank enumeration defines the 13 possible card ranks in a standard 52-card
      * deck.
      */
@@ -173,6 +113,66 @@ class Card {
             }
             return null;
         }
+    }
+
+    /**
+     * Constructs a Card object given a card string in the format "rank + suit".
+     *
+     * @param card The card string in the format "rank + suit".
+     * @throws IllegalArgumentException If the card string is invalid.
+     */
+    public Card(String card) throws IllegalArgumentException {
+        Object[] parsedCard = parseCard(card);
+        if (parsedCard != null) {
+            this.rank = (Rank) parsedCard[0];
+            this.suit = (Suit) parsedCard[1];
+        } else {
+            throw new IllegalArgumentException("Invalid card format: " + card);
+        }
+    }
+
+    // Getters
+
+    public String getRank() {
+        return rank.getRank();
+    }
+
+    public int getValue() {
+        return rank.getValue();
+    }
+
+    public String getSuit() {
+        return suit.getSuit();
+    }
+
+    @Override
+    public String toString() {
+        return rank.getRank() + suit.getSuit();
+    }
+
+    /**
+     * Parses the card string to extract the rank and suit.
+     *
+     * @param card The card string in the format "rank + suit"
+     * @return An object array containing the rank and suit, or null if the format
+     *         is
+     *         invalid
+     * @throws IllegalArgumentException If the card string is null or empty
+     */
+    private Object[] parseCard(String card) throws IllegalArgumentException {
+        if (card == null || card.isEmpty()) {
+            throw new IllegalArgumentException("Null or empty card string");
+        }
+        for (int i = 1; i <= 2; i++) {
+            String rankString = card.substring(0, i).toUpperCase();
+            String suitString = card.substring(i).toUpperCase();
+            Rank rank = Rank.fromString(rankString);
+            Suit suit = Suit.fromString(suitString);
+            if (rank != null && suit != null) {
+                return new Object[] { rank, suit };
+            }
+        }
+        return null;
     }
 }
 
@@ -289,61 +289,41 @@ public class Blackjack {
     }
 
     /**
-     * Parses and handles commands received from the server.
+     * Determines the bet amount based on the player's bankroll.
+     * 
+     * @param bankroll The player's current bankroll
+     * @return The bet amount
      */
-    public void parseCommand() {
-        String message;
-        boolean done = false;
-        while (!done) {
-            try {
-                message = read();
-            } catch (IOException e) {
-                System.err.println("ERROR: Unable to read from the server: " + e.getMessage());
-                return;
-            }
-            String[] parts = message.split(":");
-            String command = parts[0];
+    public int getBetAmount(int bankroll) {
+        // In this example, we bet 5% of the bankroll each round
+        return (int) Math.max(bankroll * 0.05, 1);
+    }
 
-            try {
-                switch (command) {
-                    case "login":
-                        handleLogin(parts);
-                        break;
+    /**
+     * Implements the player's Blackjack strategy based on the dealer's upcard and
+     * the player's current hand.
+     * 
+     * @param dealerUpcard The dealer's upcard
+     * @param hand         The player's current hand
+     * @throws IOException If an I/O error occurs
+     */
+    public void play(Card dealerUpcard, Hand hand) throws IOException {
+        int numCards = hand.getNumCards();
+        int handValue = hand.getValue();
+        Card[] cards = hand.getHand();
+        int dealerUpcardValue = dealerUpcard.getValue();
 
-                    case "bet":
-                        // handleBet(parts);
-                        write("bet:1");
-                        break;
-
-                    case "play":
-                        // handlePlay(parts);
-                        write("stand");
-                        break;
-
-                    case "status":
-                        handleStatus(parts);
-                        break;
-
-                    case "done":
-                        handleDone(parts);
-                        done = true;
-                        break;
-
-                    default:
-                        throw new IllegalArgumentException("Unknown command: " + command);
-                }
-            } catch (IOException e) {
-                System.err.println("ERROR: Unable to write to the server: " + e.getMessage());
-                return;
-            } catch (IllegalArgumentException e) {
-                System.err.println("ERROR: Unable to parse the command: " + e.getMessage());
-                return;
-            }
-        }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            System.err.println("ERROR: Unable to close the socket: " + e.getMessage());
+        // Check for split
+        if (numCards == 2 && cards[0].getRank().equals(cards[1].getRank())) {
+            write("split");
+        } // Check for double down
+        else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
+            write("double");
+        } // Implement hit or stand strategy based on dealer's upcard
+        else if (handValue < 17 && (dealerUpcardValue >= 7 || dealerUpcardValue == 11)) {
+            write("hit");
+        } else {
+            write("stand");
         }
     }
 
@@ -436,41 +416,61 @@ public class Blackjack {
     }
 
     /**
-     * Determines the bet amount based on the player's bankroll.
-     * 
-     * @param bankroll The player's current bankroll
-     * @return The bet amount
+     * Parses and handles commands received from the server.
      */
-    public int getBetAmount(int bankroll) {
-        // In this example, we bet 5% of the bankroll each round
-        return (int) Math.max(bankroll * 0.05, 1);
-    }
+    public void parseCommand() {
+        String message;
+        boolean done = false;
+        while (!done) {
+            try {
+                message = read();
+            } catch (IOException e) {
+                System.err.println("ERROR: Unable to read from the server: " + e.getMessage());
+                return;
+            }
+            String[] parts = message.split(":");
+            String command = parts[0];
 
-    /**
-     * Implements the player's Blackjack strategy based on the dealer's upcard and
-     * the player's current hand.
-     * 
-     * @param dealerUpcard The dealer's upcard
-     * @param hand         The player's current hand
-     * @throws IOException If an I/O error occurs
-     */
-    public void play(Card dealerUpcard, Hand hand) throws IOException {
-        int numCards = hand.getNumCards();
-        int handValue = hand.getValue();
-        Card[] cards = hand.getHand();
-        int dealerUpcardValue = dealerUpcard.getValue();
+            try {
+                switch (command) {
+                    case "login":
+                        handleLogin(parts);
+                        break;
 
-        // Check for split
-        if (numCards == 2 && cards[0].getRank().equals(cards[1].getRank())) {
-            write("split");
-        } // Check for double down
-        else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
-            write("double");
-        } // Implement hit or stand strategy based on dealer's upcard
-        else if (handValue < 17 && (dealerUpcardValue >= 7 || dealerUpcardValue == 11)) {
-            write("hit");
-        } else {
-            write("stand");
+                    case "bet":
+                        // handleBet(parts);
+                        write("bet:1");
+                        break;
+
+                    case "play":
+                        // handlePlay(parts);
+                        write("stand");
+                        break;
+
+                    case "status":
+                        handleStatus(parts);
+                        break;
+
+                    case "done":
+                        handleDone(parts);
+                        done = true;
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException("Unknown command: " + command);
+                }
+            } catch (IOException e) {
+                System.err.println("ERROR: Unable to write to the server: " + e.getMessage());
+                return;
+            } catch (IllegalArgumentException e) {
+                System.err.println("ERROR: Unable to parse the command: " + e.getMessage());
+                return;
+            }
+        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            System.err.println("ERROR: Unable to close the socket: " + e.getMessage());
         }
     }
 
