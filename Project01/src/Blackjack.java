@@ -1,4 +1,3 @@
-
 /*
  * filename: Blackjack.java
  * Contains classes that represent a blackjack player client that interacts with the dealer server
@@ -9,93 +8,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-
-/**
- * The Rank enumeration defines the 13 possible card ranks in a standard 52-card
- * deck.
- */
-enum Rank {
-    TWO("2"), THREE("3"), FOUR("4"), FIVE("5"), SIX("6"), SEVEN("7"), EIGHT("8"), NINE("9"),
-    TEN("10"), JACK("J"), QUEEN("Q"), KING("K"), ACE("A");
-
-    private final String rank;
-
-    /**
-     * Constructor for the Rank enumeration.
-     *
-     * @param rank The rank as a string.
-     */
-    Rank(String rank) {
-        this.rank = rank;
-    }
-
-    /**
-     * Returns the rank as a string.
-     *
-     * @return The rank as a string.
-     */
-    public String getRank() {
-        return rank;
-    }
-
-    /**
-     * Returns the Rank enumeration that matches the given string.
-     *
-     * @param rankString The rank as a string.
-     * @return The corresponding Rank enumeration, or null if no match is found.
-     */
-    public static Rank fromString(String rankString) {
-        for (Rank rank : Rank.values()) {
-            if (rank.getRank().equals(rankString)) {
-                return rank;
-            }
-        }
-        return null;
-    }
-}
-
-/**
- * The Suit enumeration defines the 4 possible card suits in a standard 52-card
- * deck.
- */
-enum Suit {
-    SPADES("S"), HEARTS("H"), DIAMONDS("D"), CLUBS("C");
-
-    private final String suit;
-
-    /**
-     * Constructor for the Suit enumeration.
-     *
-     * @param suit The suit as a string.
-     */
-    Suit(String suit) {
-        this.suit = suit;
-    }
-
-    /**
-     * Returns the suit as a string.
-     *
-     * @return The suit as a string.
-     */
-    public String getSuit() {
-        return suit;
-    }
-
-    /**
-     * Returns the Suit enumeration that matches the given string.
-     *
-     * @param suitString The suit as a string.
-     * @return The corresponding Suit enumeration, or null if no match is found.
-     */
-    public static Suit fromString(String suitString) {
-        for (Suit suit : Suit.values()) {
-            if (suit.getSuit().equals(suitString)) {
-                return suit;
-            }
-        }
-        return null;
-    }
-}
 
 /**
  * The Card class represents a playing card with a rank and suit.
@@ -111,10 +23,10 @@ class Card {
      * @throws IllegalArgumentException If the card string is invalid.
      */
     public Card(String card) throws IllegalArgumentException {
-        String[] parsedCard = parseCard(card);
+        Object[] parsedCard = parseCard(card);
         if (parsedCard != null) {
-            this.rank = Rank.fromString(parsedCard[0]);
-            this.suit = Suit.fromString(parsedCard[1]);
+            this.rank = (Rank) parsedCard[0];
+            this.suit = (Suit) parsedCard[1];
         } else {
             throw new IllegalArgumentException("Invalid card format: " + card);
         }
@@ -124,42 +36,25 @@ class Card {
      * Parses the card string to extract the rank and suit.
      *
      * @param card The card string in the format "rank + suit"
-     * @return A string array containing the rank and suit, or null if the format is
+     * @return An object array containing the rank and suit, or null if the format
+     *         is
      *         invalid
      * @throws IllegalArgumentException If the card string is null or empty
      */
-    private String[] parseCard(String card) throws IllegalArgumentException {
+    private Object[] parseCard(String card) throws IllegalArgumentException {
         if (card == null || card.isEmpty()) {
             throw new IllegalArgumentException("Null or empty card string");
         }
         for (int i = 1; i <= 2; i++) {
-            String rank = card.substring(0, i).toUpperCase();
-            String suit = card.substring(i).toUpperCase();
-            if (isValidRank(rank) && isValidSuit(suit)) {
-                return new String[] { rank, suit };
+            String rankString = card.substring(0, i).toUpperCase();
+            String suitString = card.substring(i).toUpperCase();
+            Rank rank = Rank.fromString(rankString);
+            Suit suit = Suit.fromString(suitString);
+            if (rank != null && suit != null) {
+                return new Object[] { rank, suit };
             }
         }
         return null;
-    }
-
-    /**
-     * Checks if the provided rank string is a valid rank.
-     *
-     * @param rank The rank string to be checked for validity
-     * @return true if the provided rank string is a valid rank, false otherwise
-     */
-    private boolean isValidRank(String rank) {
-        return Rank.fromString(rank) != null;
-    }
-
-    /**
-     * Checks if the provided suit string is a valid suit.
-     *
-     * @param suit The suit string to be checked for validity
-     * @return true if the provided suit string is a valid suit, false otherwise
-     */
-    private boolean isValidSuit(String suit) {
-        return Suit.fromString(suit) != null;
     }
 
     // Getters
@@ -168,34 +63,117 @@ class Card {
         return rank.getRank();
     }
 
+    public int getValue() {
+        return rank.getValue();
+    }
+
     public String getSuit() {
         return suit.getSuit();
     }
 
-    /**
-     * Gets the numerical value of the card according to its rank.
-     *
-     * @return The numerical value of the card. Ace returns 11, face cards (King,
-     *         Queen, and Jack) return 10,
-     *         and all other cards return their rank as an integer value.
-     */
-    public int getValue() {
-        switch (rank) {
-            case ACE:
-                return 11;
-            case KING:
-            case QUEEN:
-            case JACK:
-                return 10;
-            default:
-                return Integer.parseInt(rank.getRank());
-        }
-    }
-
+    @Override
     public String toString() {
         return rank.getRank() + suit.getSuit();
     }
 
+    /**
+     * The Rank enumeration defines the 13 possible card ranks in a standard 52-card
+     * deck.
+     */
+    private enum Rank {
+        TWO("2", 2), THREE("3", 3), FOUR("4", 4), FIVE("5", 5), SIX("6", 6), SEVEN("7", 7), EIGHT("8", 8), NINE("9", 9),
+        TEN("10", 10), JACK("J", 10), QUEEN("Q", 10), KING("K", 10), ACE("A", 10);
+
+        private final String rank;
+        private final int value;
+
+        /**
+         * Constructor for the Rank enumeration.
+         *
+         * @param rank  The rank as a string.
+         * @param value The rank as an int.
+         */
+        Rank(String rank, int value) {
+            this.rank = rank;
+            this.value = value;
+        }
+
+        /**
+         * Returns the rank as a string.
+         *
+         * @return The rank as a string.
+         */
+        public String getRank() {
+            return rank;
+        }
+
+        /**
+         * Returns the value of the rank as an int.
+         *
+         * @return The rank value as an int.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Returns the Rank enumeration that matches the given string.
+         *
+         * @param rankString The rank as a string.
+         * @return The corresponding Rank enumeration, or null if no match is found.
+         */
+        public static Rank fromString(String rankString) {
+            for (Rank rank : Rank.values()) {
+                if (rank.getRank().equals(rankString)) {
+                    return rank;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * The Suit enumeration defines the 4 possible card suits in a standard 52-card
+     * deck.
+     */
+    private enum Suit {
+        SPADES("S"), HEARTS("H"), DIAMONDS("D"), CLUBS("C");
+
+        private final String suit;
+
+        /**
+         * Constructor for the Suit enumeration.
+         *
+         * @param suit The suit as a string.
+         */
+        Suit(String suit) {
+            this.suit = suit;
+        }
+
+        /**
+         * Returns the suit as a string.
+         *
+         * @return The suit as a string.
+         */
+        public String getSuit() {
+            return suit;
+        }
+
+        /**
+         * Returns the Suit enumeration that matches the given string.
+         *
+         * @param suitString The suit as a string.
+         * @return The corresponding Suit enumeration, or null if no match is found.
+         */
+        public static Suit fromString(String suitString) {
+            for (Suit suit : Suit.values()) {
+                if (suit.getSuit().equals(suitString)) {
+                    return suit;
+                }
+            }
+            return null;
+        }
+    }
 }
 
 /**
@@ -333,11 +311,13 @@ public class Blackjack {
                         break;
 
                     case "bet":
-                        handleBet(parts);
+                        // handleBet(parts);
+                        write("bet:1");
                         break;
 
                     case "play":
-                        handlePlay(parts);
+                        // handlePlay(parts);
+                        write("stand");
                         break;
 
                     case "status":
@@ -350,7 +330,7 @@ public class Blackjack {
                         break;
 
                     default:
-                        System.err.println("ERROR: Unable to parse the command: Unknown command: " + command);
+                        throw new IllegalArgumentException("Unknown command: " + command);
                 }
             } catch (IOException e) {
                 System.err.println("ERROR: Unable to write to the server: " + e.getMessage());
