@@ -4,11 +4,6 @@
  * Author: Ryan Fahimi
  */
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-
 /**
  * The BlackjackHand class represents a hand of playing cards in Blackjack.
  */
@@ -77,9 +72,7 @@ class BlackjackHand {
  * server and plays a game of Blackjack.
  */
 public class Blackjack {
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    private Connection connection;
 
     /**
      * Constructs a Blackjack object and connects to the server at the specified IP
@@ -90,35 +83,7 @@ public class Blackjack {
      */
 
     public Blackjack(String ipAddress, int ipPort) {
-        try {
-            socket = new Socket(ipAddress, ipPort);
-            dis = new DataInputStream(socket.getInputStream());
-            dos = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            System.err.println("ERROR: Unable to connect to the server: " + e.getMessage());
-            System.exit(1);
-        }
-    }
-
-    /**
-     * Writes a string to the server.
-     * 
-     * @param s The string to send
-     * @throws IOException If an I/O error occurs
-     */
-    private void write(String s) throws IOException {
-        dos.writeUTF(s);
-        dos.flush();
-    }
-
-    /**
-     * Reads a string from the server.
-     * 
-     * @return The received string
-     * @throws IOException If an I/O error occurs
-     */
-    private String read() throws IOException {
-        return dis.readUTF();
+        connection = new Connection(ipAddress, ipPort);
     }
 
     /**
@@ -127,7 +92,7 @@ public class Blackjack {
      * @param bankroll The player's current bankroll
      * @return The bet amount
      */
-    public int getBetAmount(int bankroll) {
+    public int getBet(int bankroll) {
         // In this example, we bet 5% of the bankroll each round
         return (int) Math.max(bankroll * 0.05, 1);
     }
@@ -138,9 +103,8 @@ public class Blackjack {
      * 
      * @param dealerUpcard The dealer's upcard
      * @param hand         The player's current hand
-     * @throws IOException If an I/O error occurs
      */
-    public void play(Card dealerUpcard, AceyHand hand) throws IOException {
+    public void play(Card dealerUpcard, AceyHand hand) {
         int numCards = hand.getNumCards();
         int handValue = hand.getValue();
         Card[] cards = hand.getHand();
@@ -148,15 +112,15 @@ public class Blackjack {
 
         // Check for split
         if (numCards == 2 && cards[0].rank.getString().equals(cards[1].rank.getString())) {
-            write("split");
+            connection.write("split");
         } // Check for double down
         else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
-            write("double");
+            connection.write("double");
         } // Implement hit or stand strategy based on dealer's upcard
         else if (handValue < 17 && (dealerUpcardValue >= 7 || dealerUpcardValue == 11)) {
-            write("hit");
+            connection.write("hit");
         } else {
-            write("stand");
+            connection.write("stand");
         }
     }
 
@@ -164,33 +128,29 @@ public class Blackjack {
      * Handles the login process with the provided message parts.
      *
      * @param commandParts The message parts containing the login information
-     * @throws IOException              If an error occurs while writing the login
-     *                                  message
      * @throws IllegalArgumentException If the login message format is invalid
      */
-    private void handleLogin(String[] commandParts) throws IOException, IllegalArgumentException {
+    private void handleLogin(String[] commandParts) throws IllegalArgumentException {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid login message format");
         }
-        write("rfahimi:21Savage");
+        connection.write("rfahimi:21Savage");
     }
 
     /**
      * Handles the bet placing process with the provided message parts.
      *
      * @param commandParts The message parts containing the bet information
-     * @throws IOException              If an error occurs while writing the bet
-     *                                  message
      * @throws IllegalArgumentException If the bet message format is invalid
      */
-    private void handleBet(String[] commandParts) throws IOException, IllegalArgumentException {
+    private void handleBet(String[] commandParts) throws IllegalArgumentException {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid bet message format");
         }
         int bankroll;
         try {
             bankroll = Integer.parseInt(commandParts[1]);
-            write("bet:" + getBetAmount(bankroll));
+            connection.write("bet:" + getBet(bankroll));
         } catch (NumberFormatException e) {
             System.err
                     .println("ERROR: Unable to initialize bankroll: Bankroll value is not an int: " + commandParts[1]);
@@ -202,10 +162,9 @@ public class Blackjack {
      * Handles the play process with the provided message parts.
      *
      * @param commandParts The message parts containing the play information
-     * @throws IOException              If an error occurs while playing
      * @throws IllegalArgumentException If the play message format is invalid
      */
-    private void handlePlay(String[] commandParts) throws IOException, IllegalArgumentException {
+    private void handlePlay(String[] commandParts) throws IllegalArgumentException {
         if (commandParts.length < 3) {
             throw new IllegalArgumentException("Invalid play message format");
         }
@@ -247,7 +206,7 @@ public class Blackjack {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid done message format");
         }
-        System.out.println("Game over: " + commandParts[1]);
+        System.out.println("Game result: " + commandParts[1]);
     }
 
     /**
@@ -257,12 +216,7 @@ public class Blackjack {
         String command;
         boolean done = false;
         while (!done) {
-            try {
-                command = read();
-            } catch (IOException e) {
-                System.err.println("ERROR: Unable to read from the server: " + e.getMessage());
-                return;
-            }
+            command = connection.read();
             String[] commandParts = command.split(":");
             command = commandParts[0];
 
@@ -274,12 +228,12 @@ public class Blackjack {
 
                     case "bet":
                         // handleBet(commandParts);
-                        write("bet:1");
+                        connection.write("bet:1");
                         break;
 
                     case "play":
                         // handlePlay(commandParts);
-                        write("stand");
+                        connection.write("stand");
                         break;
 
                     case "status":
@@ -294,19 +248,12 @@ public class Blackjack {
                     default:
                         throw new IllegalArgumentException("Unknown command: " + command);
                 }
-            } catch (IOException e) {
-                System.err.println("ERROR: Unable to write to the server: " + e.getMessage());
-                return;
             } catch (IllegalArgumentException e) {
                 System.err.println("ERROR: Unable to parse the command: " + e.getMessage());
                 return;
             }
         }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            System.err.println("ERROR: Unable to close the socket: " + e.getMessage());
-        }
+        connection.close();
     }
 
     /**

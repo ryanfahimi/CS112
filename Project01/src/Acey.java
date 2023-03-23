@@ -1,8 +1,3 @@
-import java.net.Socket;
-import java.io.IOException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-
 /**
  * The Acey Hand class represents a hand of playing cards in Acey.
  */
@@ -54,69 +49,93 @@ class AceyHand {
 }
 
 public class Acey {
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    private Connection connection;
 
     public Acey(String ipAddress, int ipPort) {
-        try {
-            socket = new Socket(ipAddress, ipPort);
-            dis = new DataInputStream(socket.getInputStream());
-            dos = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            System.err.println("ERROR: Unable to connect to the server: " + e.getMessage());
-            System.exit(1);
+        connection = new Connection(ipAddress, ipPort);
+    }
+
+    /**
+     * Implements the player's Acey strategy based on the
+     * the player's current hand and bet amount.
+     * 
+     * @param hand  The player's current hand
+     * @param stack The player's bankroll amount
+     * @param pot   The current pot amount
+     */
+    private void play(AceyHand hand, int stack, int pot) {
+        int difference = hand.getDifference();
+        double confidence;
+
+        String decision;
+        if (difference == 0) {
+            decision = hand.getValue() > 16 ? "low" : "high";
+            confidence = 0.3;
+        } else if (difference <= 2) {
+            decision = "mid";
+            confidence = 0;
+        } else {
+            decision = "mid";
+            confidence = 1.0 - (1.0 / difference);
+            confidence = Math.min(confidence, 0.7); // Limit the maximum confidence to 70% to avoid losing all chips
         }
-    }
 
-    private void write(String s) throws IOException {
-        dos.writeUTF(s);
-        dos.flush();
-    }
-
-    private String read() throws IOException {
-        return dis.readUTF();
+        int bet = (int) (stack * confidence);
+        bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
+        connection.write(decision + ":" + bet);
     }
 
     /**
      * Handles the login process with the provided message parts.
      *
      * @param commandParts The message parts containing the login information
-     * @throws IOException              If an error occurs while writing the login
-     *                                  message
      * @throws IllegalArgumentException If the login message format is invalid
      */
-    private void handleLogin(String[] commandParts) throws IOException, IllegalArgumentException {
+    private void handleLogin(String[] commandParts) throws IllegalArgumentException {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid login message format");
         }
-        write("rfahimi:AceyDoesIt");
+        connection.write("rfahimi:AceyDoesIt");
     }
 
-    private void handlePlay(String[] commandParts) throws IOException {
-        int bet = 0;
-        String decision = (commandParts[4] == commandParts[5]) ? ("high") : ("mid");
-        write(decision + ":" + bet);
+    private void handlePlay(String[] commandParts) {
+        if (commandParts.length < 6) {
+            throw new IllegalArgumentException("Invalid play message format");
+        }
+
+        AceyHand hand = new AceyHand();
+
+        // Add cards to the hand
+        for (int i = 3; i < commandParts.length; i++) {
+            Card card = Card.fromString(commandParts[i]);
+            hand.addCard(card);
+        }
+        int pot = Integer.parseInt(commandParts[1]);
+        int stack = Integer.parseInt(commandParts[2]);
+        play(hand, stack, pot);
     }
 
-    private void handleStatus(String[] commandParts) throws IOException {
+    private void handleStatus(String[] commandParts) {
+        if (commandParts.length < 2) {
+            throw new IllegalArgumentException("Invalid status message format");
+        }
 
+        System.out.println("Status: " + commandParts[1]);
     }
 
-    private void handleDone(String[] commandParts) throws IOException {
+    private void handleDone(String[] commandParts) {
+        if (commandParts.length < 2) {
+            throw new IllegalArgumentException("Invalid done message format");
+        }
 
+        System.out.println("Game result: " + commandParts[1]);
     }
 
     public void parseCommand() {
         String command;
         boolean done = false;
         while (!done) {
-            try {
-                command = read();
-            } catch (IOException e) {
-                System.err.println("ERROR: Unable to read from the server: " + e.getMessage());
-                return;
-            }
+            command = connection.read();
             String[] commandParts = command.split(":");
             command = commandParts[0];
 
@@ -138,19 +157,12 @@ public class Acey {
                     default:
                         throw new IllegalArgumentException("Unknown command: " + command);
                 }
-            } catch (IOException e) {
-                System.err.println("ERROR: Unable to write to the server: " + e.getMessage());
-                return;
             } catch (IllegalArgumentException e) {
                 System.err.println("ERROR: Unable to parse the command: " + e.getMessage());
                 return;
             }
         }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            System.err.println("ERROR: Unable to close the socket: " + e.getMessage());
-        }
+        connection.close();
     }
 
     public static void main(String[] args) {
