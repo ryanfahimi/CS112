@@ -29,6 +29,17 @@ class Connection {
         }
     }
 
+    public Connection(Socket socket) {
+        try {
+            this.socket = socket;
+            dis = new DataInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            System.err.println("ERROR: Unable to connect to the server: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
     /**
      * Sends a message to the server.
      *

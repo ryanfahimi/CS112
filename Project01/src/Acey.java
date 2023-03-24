@@ -1,60 +1,4 @@
 /**
- * The Acey Hand class represents a hand of playing cards in Acey.
- */
-class AceyHand {
-    private Card[] hand;
-    private int numCards;
-    private int value;
-    private int difference;
-
-    /**
-     * Constructs an empty Hand object.
-     */
-    public AceyHand() {
-        hand = new Card[3];
-        numCards = 0;
-        value = 0;
-    }
-
-    /**
-     * Adds a card to the hand.
-     *
-     * @param card The card to add
-     */
-    public void addCard(Card card) {
-        hand[numCards] = card;
-        value += card.rank.toInt();
-        numCards++;
-    }
-
-    /**
-     * Calculates and returns the difference between the first two cards in the
-     * hand.
-     *
-     * @return The difference between the first two cards in the hand
-     */
-    public int getDifference() {
-        difference = Math.abs(hand[1].rank.toInt() - hand[0].rank.toInt());
-        return difference;
-    }
-
-    // Getters
-
-    public int getValue() {
-        return value;
-    }
-
-    public int getNumCards() {
-        return numCards;
-    }
-
-    public Card[] getHand() {
-        return hand;
-    }
-
-}
-
-/**
  * The Acey class represents a simple AceyDeucey player that connects to a
  * server and plays a game of AceyDeucey.
  */
@@ -73,7 +17,7 @@ public class Acey {
      * @param stack The player's bankroll amount
      * @param pot   The current pot amount
      */
-    private void play(AceyHand hand, int stack, int pot) {
+    private void makeBet(AceyHand hand, int stack, int pot) {
         int difference = hand.getDifference();
         double confidence;
 
@@ -81,7 +25,7 @@ public class Acey {
         if (difference == 0) {
             decision = hand.getValue() > 16 ? "low" : "high";
             confidence = 0.3;
-        } else if (difference <= 2) {
+        } else if (difference <= 4) {
             decision = "mid";
             confidence = 0;
         } else {
@@ -89,7 +33,6 @@ public class Acey {
             confidence = 1.0 - (1.0 / difference);
             confidence = Math.min(confidence, 0.7); // Limit the maximum confidence to 70% to avoid losing all chips
         }
-
         int bet = (int) (stack * confidence);
         bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
         connection.write(decision + ":" + bet);
@@ -102,7 +45,7 @@ public class Acey {
      * @throws IllegalArgumentException If the login message format is invalid
      */
     private void handleLogin(String[] commandParts) throws IllegalArgumentException {
-        if (commandParts.length < 2) {
+        if (commandParts.length < 1) {
             throw new IllegalArgumentException("Invalid login message format");
         }
         connection.write("rfahimi:AceyDoesIt");
@@ -115,7 +58,7 @@ public class Acey {
      * @throws IllegalArgumentException If the play message format is invalid
      */
     private void handlePlay(String[] commandParts) {
-        if (commandParts.length < 6) {
+        if (commandParts.length < 5) {
             throw new IllegalArgumentException("Invalid play message format");
         }
 
@@ -128,7 +71,7 @@ public class Acey {
         }
         int pot = Integer.parseInt(commandParts[1]);
         int stack = Integer.parseInt(commandParts[2]);
-        play(hand, stack, pot);
+        makeBet(hand, stack, pot);
     }
 
     /**
@@ -138,7 +81,7 @@ public class Acey {
      * @throws IllegalArgumentException If the status message format is invalid
      */
     private void handleStatus(String[] commandParts) {
-        if (commandParts.length < 2) {
+        if (commandParts.length < 5) {
             throw new IllegalArgumentException("Invalid status message format");
         }
 
@@ -155,7 +98,6 @@ public class Acey {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid done message format");
         }
-
         System.out.println("Game result: " + commandParts[1]);
     }
 

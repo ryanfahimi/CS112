@@ -6,15 +6,15 @@
 class Deck {
     Card[] deck; // Array to hold the deck of 364 playing cards
     private Card[] dealtCards;
-    private int cardsLeft; // Instance variable to track the number of cards left for dealing
+    private int numCards; // Instance variable to track the number of cards left for dealing
 
     /**
      * Constructs a new deck of 364 playing cards.
      */
     public Deck() {
+        numCards = 0;
         deck = new Card[364];
         dealtCards = new Card[364];
-        cardsLeft = deck.length;
         initializeDeck();
     }
 
@@ -26,7 +26,8 @@ class Deck {
         for (int i = 0; i < 7; i++) {
             for (Suit suit : Suit.values()) {
                 for (Rank rank : Rank.values()) {
-                    deck[i] = (new Card(rank, suit));
+                    deck[numCards] = (new Card(rank, suit));
+                    numCards++;
                 }
             }
         }
@@ -44,7 +45,7 @@ class Deck {
             deck[current] = deck[random];
             deck[random] = temp;
         }
-        cardsLeft = deck.length;
+        numCards = deck.length;
         dealtCards = new Card[364];
     }
 
@@ -57,12 +58,16 @@ class Deck {
      */
     public Card deal() {
         Card dealtCard;
-        if (cardsLeft < 3) {
+        if (numCards < 3) {
             shuffle();
         }
-        dealtCard = deck[--cardsLeft];
-        dealtCards[cardsLeft] = dealtCard;
+        dealtCard = deck[--numCards];
+        dealtCards[numCards] = dealtCard;
         return dealtCard;
+    }
+
+    public int getNumCards() {
+        return numCards;
     }
 
     /**
@@ -73,7 +78,7 @@ class Deck {
     @Override
     public String toString() {
         String deckString = "";
-        for (int i = 0; i <= cardsLeft; i++) {
+        for (int i = 0; i <= numCards; i++) {
             Card card = this.deck[i];
             deckString += card.toString() + ":";
         }

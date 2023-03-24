@@ -21,6 +21,7 @@ enum Suit {
      *
      * @return The suit as a string.
      */
+    @Override
     public String toString() {
         return suitString;
     }
