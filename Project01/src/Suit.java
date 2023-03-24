@@ -21,7 +21,7 @@ enum Suit {
      *
      * @return The suit as a string.
      */
-    public String getString() {
+    public String toString() {
         return suitString;
     }
 
@@ -33,7 +33,7 @@ enum Suit {
      */
     public static Suit fromString(String suitString) {
         for (Suit suitEnum : Suit.values()) {
-            if (suitEnum.getString().equals(suitString)) {
+            if (suitEnum.toString().equals(suitString)) {
                 return suitEnum;
             }
         }

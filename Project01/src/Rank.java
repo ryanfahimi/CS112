@@ -25,7 +25,7 @@ enum Rank {
      *
      * @return The rank as a string.
      */
-    public String getString() {
+    public String toString() {
         return rankString;
     }
 
@@ -34,7 +34,7 @@ enum Rank {
      *
      * @return The rank as an int.
      */
-    public int getInt() {
+    public int toInt() {
         return rankInt;
     }
 
@@ -46,7 +46,7 @@ enum Rank {
      */
     public static Rank fromString(String rankString) {
         for (Rank rankEnum : Rank.values()) {
-            if (rankEnum.getString().equals(rankString)) {
+            if (rankEnum.toString().equals(rankString)) {
                 return rankEnum;
             }
         }

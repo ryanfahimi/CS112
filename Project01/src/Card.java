@@ -18,7 +18,7 @@ class Card {
 
     @Override
     public String toString() {
-        return rank.getString() + suit.getString();
+        return rank.toString() + suit.toString();
     }
 
     /**

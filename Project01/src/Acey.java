@@ -23,12 +23,18 @@ class AceyHand {
      */
     public void addCard(Card card) {
         hand[numCards] = card;
-        value += card.rank.getInt();
+        value += card.rank.toInt();
         numCards++;
     }
 
+    /**
+     * Calculates and returns the difference between the first two cards in the
+     * hand.
+     *
+     * @return The difference between the first two cards in the hand
+     */
     public int getDifference() {
-        difference = Math.abs(hand[1].rank.getInt() - hand[0].rank.getInt());
+        difference = Math.abs(hand[1].rank.toInt() - hand[0].rank.toInt());
         return difference;
     }
 
@@ -48,6 +54,10 @@ class AceyHand {
 
 }
 
+/**
+ * The Acey class represents a simple AceyDeucey player that connects to a
+ * server and plays a game of AceyDeucey.
+ */
 public class Acey {
     private Connection connection;
 
@@ -57,7 +67,7 @@ public class Acey {
 
     /**
      * Implements the player's Acey strategy based on the
-     * the player's current hand and bet amount.
+     * the player's current hand, bankroll amount, and the current pot.
      * 
      * @param hand  The player's current hand
      * @param stack The player's bankroll amount
@@ -98,6 +108,12 @@ public class Acey {
         connection.write("rfahimi:AceyDoesIt");
     }
 
+    /**
+     * Handles the play and bet placing process with the provided message parts.
+     *
+     * @param commandParts The message parts containing the play information
+     * @throws IllegalArgumentException If the play message format is invalid
+     */
     private void handlePlay(String[] commandParts) {
         if (commandParts.length < 6) {
             throw new IllegalArgumentException("Invalid play message format");
@@ -115,6 +131,12 @@ public class Acey {
         play(hand, stack, pot);
     }
 
+    /**
+     * Handles the status display process with the provided message parts.
+     *
+     * @param commandParts The message parts containing the status information
+     * @throws IllegalArgumentException If the status message format is invalid
+     */
     private void handleStatus(String[] commandParts) {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid status message format");
@@ -123,6 +145,12 @@ public class Acey {
         System.out.println("Status: " + commandParts[1]);
     }
 
+    /**
+     * Handles the completion of the game with the provided message parts.
+     *
+     * @param commandParts The message parts containing the completion information
+     * @throws IllegalArgumentException If the done message format is invalid
+     */
     private void handleDone(String[] commandParts) {
         if (commandParts.length < 2) {
             throw new IllegalArgumentException("Invalid done message format");
@@ -131,6 +159,10 @@ public class Acey {
         System.out.println("Game result: " + commandParts[1]);
     }
 
+    /**
+     * Parses commands received from the server and calls the corresponding handler
+     * methods.
+     */
     public void parseCommand() {
         String command;
         boolean done = false;
@@ -165,6 +197,12 @@ public class Acey {
         connection.close();
     }
 
+    /**
+     * The main method which initializes the Acey player and starts parsing
+     * commands.
+     *
+     * @param args The command line arguments containing the IP address and port
+     */
     public static void main(String[] args) {
         String ipAddress;
         int ipPort;

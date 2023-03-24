@@ -12,7 +12,7 @@ class BlackjackHand {
     private int numCards;
 
     /**
-     * Constructs an empty Hand object.
+     * Constructs an empty BlackjackHand object.
      */
     public BlackjackHand() {
         hand = new Card[11]; // Maximum 11 cards in a blackjack hand
@@ -40,8 +40,8 @@ class BlackjackHand {
 
         for (int i = 0; i < numCards; i++) {
             Card card = hand[i];
-            int cardValue = card.rank.getInt();
-            if (card.rank.getString().equals("A")) {
+            int cardValue = card.rank.toInt();
+            if (card.rank.toString().equals("A")) {
                 numAces++;
             }
             value += cardValue;
@@ -108,10 +108,10 @@ public class Blackjack {
         int numCards = hand.getNumCards();
         int handValue = hand.getValue();
         Card[] cards = hand.getHand();
-        int dealerUpcardValue = dealerUpcard.rank.getInt();
+        int dealerUpcardValue = dealerUpcard.rank.toInt();
 
         // Check for split
-        if (numCards == 2 && cards[0].rank.getString().equals(cards[1].rank.getString())) {
+        if (numCards == 2 && cards[0].rank.toString().equals(cards[1].rank.toString())) {
             connection.write("split");
         } // Check for double down
         else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
@@ -210,7 +210,8 @@ public class Blackjack {
     }
 
     /**
-     * Parses and handles commands received from the server.
+     * Parses commands received from the server and calls the corresponding handler
+     * methods.
      */
     public void parseCommand() {
         String command;

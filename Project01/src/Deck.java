@@ -1,11 +1,28 @@
+/**
+ * Represents a deck of playing cards.
+ * The deck consists of 364 cards, which is a combination of 7 standard 52-card
+ * decks.
+ */
 class Deck {
-    // A deck of playing cards consists of 52 cards in total, one for each suit and
-    // value combination
-    Card deck[] = new Card[364]; // Instantiate a deck of 364 playing cards
-    private int cardsLeft = deck.length; // Initialize the instance variable 'cardsLeft' for the deal and shuffle
-                                         // methods
+    Card[] deck; // Array to hold the deck of 364 playing cards
+    private Card[] dealtCards;
+    private int cardsLeft; // Instance variable to track the number of cards left for dealing
 
+    /**
+     * Constructs a new deck of 364 playing cards.
+     */
     public Deck() {
+        deck = new Card[364];
+        dealtCards = new Card[364];
+        cardsLeft = deck.length;
+        initializeDeck();
+    }
+
+    /**
+     * Initializes the deck by populating it with 7 sets of standard 52 playing
+     * cards.
+     */
+    private void initializeDeck() {
         for (int i = 0; i < 7; i++) {
             for (Suit suit : Suit.values()) {
                 for (Rank rank : Rank.values()) {
@@ -15,42 +32,51 @@ class Deck {
         }
     }
 
-    // Utilize the Fisher-Yates shuffle algorithm to arrange all the cards in the
-    // deck randomly with an equal chance for every permutation
+    /**
+     * Shuffles the deck of cards using the Fisher-Yates algorithm.
+     * This method ensures that all the cards in the deck are arranged randomly
+     * with an equal chance for every permutation.
+     */
     public void shuffle() {
-        // Iterate 'current' from the length of the cardDeck array down to 1 to
-        // represent the index of the current card in the cardDeck array
         for (int current = deck.length - 1; current > 0; current--) {
-            // Set 'random' to a random integer in the range [0,current] to represent the
-            // index of a random card in a subset of the cardDeck array
             int random = (int) (Math.random() * (current + 1));
-            // Swap the two cards in the cardDeck
             Card temp = deck[current];
             deck[current] = deck[random];
             deck[random] = temp;
         }
-        // Reset 'cardsLeft' instance variable to enable dealing
         cardsLeft = deck.length;
+        dealtCards = new Card[364];
     }
 
-    // Deal one card from the deck
+    /**
+     * Deals one card from the deck.
+     * If there are less than 3 cards left in the deck, it shuffles the deck before
+     * dealing a card.
+     *
+     * @return the dealt card
+     */
     public Card deal() {
+        Card dealtCard;
         if (cardsLeft < 3) {
             shuffle();
         }
-        return deck[--cardsLeft];
+        dealtCard = deck[--cardsLeft];
+        dealtCards[cardsLeft] = dealtCard;
+        return dealtCard;
     }
 
-    // Create a string representation of the entire deck of cards
+    /**
+     * Returns a string representation of the entire deck of cards.
+     *
+     * @return the string representation of the deck
+     */
+    @Override
     public String toString() {
-        String deck = "";
-        // Loop through each card in the cardDeck array and add its string
-        // representation to the cardDeck string
+        String deckString = "";
         for (int i = 0; i <= cardsLeft; i++) {
             Card card = this.deck[i];
-            deck += card.toString() + ":";
+            deckString += card.toString() + ":";
         }
-        // Return the final cardDeck string
-        return deck;
+        return deckString;
     }
 }

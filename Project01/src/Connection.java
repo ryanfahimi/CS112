@@ -3,11 +3,21 @@ import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+/**
+ * Represents a connection to a server using a socket.
+ * Handles sending and receiving messages from the server.
+ */
 class Connection {
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
 
+    /**
+     * Constructs a new connection to a server at the specified IP address and port.
+     *
+     * @param ipAddress The IP address of the server
+     * @param ipPort    The port number of the server
+     */
     public Connection(String ipAddress, int ipPort) {
         try {
             socket = new Socket(ipAddress, ipPort);
@@ -19,6 +29,11 @@ class Connection {
         }
     }
 
+    /**
+     * Sends a message to the server.
+     *
+     * @param s The message to send
+     */
     public void write(String s) {
         try {
             dos.writeUTF(s);
@@ -29,6 +44,11 @@ class Connection {
         }
     }
 
+    /**
+     * Reads a message from the server.
+     *
+     * @return The message received from the server
+     */
     public String read() {
         try {
             return dis.readUTF();
@@ -39,6 +59,9 @@ class Connection {
         return null;
     }
 
+    /**
+     * Closes the connection to the server.
+     */
     public void close() {
         try {
             socket.close();
