@@ -32,9 +32,10 @@ abstract class Hand {
     @Override
     public String toString() {
         String hand = "";
-        for (int i = 0; i < numCards; i++) {
+        hand += this.hand[0].toString();
+        for (int i = 1; i < numCards; i++) {
             Card card = this.hand[i];
-            hand += card.toString() + ":";
+            hand += ":" + card.toString();
         }
         return hand;
     }

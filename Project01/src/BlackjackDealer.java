@@ -10,27 +10,19 @@ class BlackjackDealer extends Dealer {
         int bet = handleBet(connection);
         // Deal cards
         BlackjackHand playerHand = dealHand();
-
         BlackjackHand dealerHand = dealHand();
 
         // Play the round
         boolean roundOver = false;
         while (!roundOver) {
-            roundOver = handlePlayerTurn(connection, playerHand, dealerHand, roundOver);
+            roundOver = handlePlayerTurn(connection, playerHand, dealerHand);
             roundOver = handleDealerTurn(dealerHand, roundOver);
         }
 
         // Determine the winner and update the stack
         String roundResult = determineRoundResult(playerHand, dealerHand, bet);
 
-        // Send round result to the player
-        connection
-                .write("status:" + roundResult + ":dealer:" + dealerHand.getValue() + ":you:" + playerHand.getValue());
-
-        // Print the round result
-        System.out.println("Round " + round + " - Result: " + roundResult.toUpperCase() + ", Player bet " + bet
-                + " chips. Stack is now " + stack);
-        round++;
+        sendStatus(roundResult, connection, dealerHand, playerHand, bet);
     }
 
     private int handleBet(Connection connection) {
@@ -50,13 +42,13 @@ class BlackjackDealer extends Dealer {
         return hand;
     }
 
-    private boolean handlePlayerTurn(Connection connection, BlackjackHand playerHand, BlackjackHand dealerHand,
-            boolean roundOver) {
+    private void sendPlayCommand(Connection connection, BlackjackHand playerHand, BlackjackHand dealerHand) {
         Card dealerUpCard = dealerHand.getHand()[dealerHand.getNumCards() - 1];
-
         String playCommand = "play:dealer:" + dealerUpCard + ":you:" + playerHand;
         connection.write(playCommand);
-        // Parse player response
+    }
+
+    private boolean processPlayerResponse(Connection connection, BlackjackHand playerHand) {
         String response = connection.read();
         System.out.println("Received play response: " + response);
 
@@ -66,13 +58,11 @@ class BlackjackDealer extends Dealer {
                 playerHand.addCard(deck.deal());
                 break;
             case "stand":
-                roundOver = true;
-                break;
+                return true;
             case "double":
                 bet *= 2;
                 playerHand.addCard(deck.deal());
-                roundOver = true;
-                break;
+                return true;
             case "split":
                 // Implement split logic if desired
                 break;
@@ -83,10 +73,15 @@ class BlackjackDealer extends Dealer {
 
         // Check for player bust
         if (playerHand.isBust()) {
-            roundOver = true;
+            return true;
         }
 
-        return roundOver;
+        return false;
+    }
+
+    private boolean handlePlayerTurn(Connection connection, BlackjackHand playerHand, BlackjackHand dealerHand) {
+        sendPlayCommand(connection, playerHand, dealerHand);
+        return processPlayerResponse(connection, playerHand);
     }
 
     private boolean handleDealerTurn(BlackjackHand dealerHand, boolean roundOver) {
@@ -116,6 +111,18 @@ class BlackjackDealer extends Dealer {
         }
 
         return roundResult;
+    }
+
+    private void sendStatus(String roundResult, Connection connection, BlackjackHand dealerHand,
+            BlackjackHand playerHand,
+            int bet) {
+        // Send round result to the player
+        connection
+                .write("status:" + roundResult + ":dealer:" + dealerHand.getValue() + ":you:" + playerHand.getValue());
+
+        // Print the round result
+        System.out.println("Round " + round + " - Result: " + roundResult.toUpperCase() + ", Player bet " + bet
+                + " chips. Stack is now " + stack);
     }
 
     public static void main(String[] args) {

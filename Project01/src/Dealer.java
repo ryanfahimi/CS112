@@ -31,19 +31,24 @@ public abstract class Dealer {
         }
     }
 
-    protected void handleClient(Socket clientSocket) {
+    private void handleClient(Socket clientSocket) {
         Connection connection = new Connection(clientSocket);
 
         // Send login command
         sendLoginCommand(connection);
 
-        while (stack > 0) {
-            playRound(connection);
-        }
+        playGame(connection);
 
         // Finish game
         connection.write("done:Out of chips");
         connection.close();
+    }
+
+    private void playGame(Connection connection) {
+        while (stack > 1) {
+            playRound(connection);
+            round++;
+        }
     }
 
     protected abstract void playRound(Connection connection);

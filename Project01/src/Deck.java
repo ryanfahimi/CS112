@@ -78,11 +78,12 @@ class Deck {
      */
     @Override
     public String toString() {
-        String deckString = "";
-        for (int i = 0; i <= numCards; i++) {
+        String deck = "";
+        deck += this.deck[0].toString();
+        for (int i = 1; i <= numCards; i++) {
             Card card = this.deck[i];
-            deckString += card.toString() + ":";
+            deck += ":" + card.toString();
         }
-        return deckString;
+        return deck;
     }
 }
