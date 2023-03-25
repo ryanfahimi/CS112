@@ -31,6 +31,7 @@ class Deck {
                 }
             }
         }
+        shuffle();
     }
 
     /**

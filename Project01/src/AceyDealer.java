@@ -13,7 +13,7 @@ public class AceyDealer {
     public AceyDealer(int port) {
         this.port = port;
         deck = new Deck();
-        stack = 50;
+        stack = 500;
         pot = 0;
         ante = 1;
         round = 1;
@@ -99,9 +99,7 @@ public class AceyDealer {
             connection.write("done:Out of chips");
             connection.close();
 
-        } catch (
-
-        IOException e) {
+        } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
     }
