@@ -1,71 +1,17 @@
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-public class BlackjackDealer {
-    private static final int DEFAULT_PORT = 8080;
-    private static final int STARTING_STACK = 50;
-
-    private int port;
-    private Deck deck;
-    private int stack;
-    private int round;
+class BlackjackDealer extends Dealer {
     private int bet;
 
-    public BlackjackDealer(int port) {
-        this.port = port;
-        deck = new Deck();
-        stack = STARTING_STACK;
-        round = 1;
+    public BlackjackDealer(int ipPort) {
+        super(ipPort);
     }
 
-    public void start() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Blackjack Dealer Server is running...");
-
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("Accepted connection from " + clientSocket.getRemoteSocketAddress());
-
-            Connection connection = new Connection(clientSocket);
-
-            // Send login command
-            sendLoginCommand(connection);
-
-            while (stack > 0) {
-                playRound(connection);
-            }
-
-            // Finish game
-            connection.write("done:Out of chips");
-            connection.close();
-
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-    }
-
-    private void sendLoginCommand(Connection connection) {
-        connection.write("login");
-        String loginResponse = connection.read();
-        System.out.println("Received login response: " + loginResponse);
-    }
-
-    private void playRound(Connection connection) {
-        // Send bet command
-        connection.write("bet:" + stack);
-        String betResponse = connection.read();
-        System.out.println("Received bet response: " + betResponse);
-        String[] betResponseParts = betResponse.split(":");
-        bet = Integer.parseInt(betResponseParts[1]);
-
+    @Override
+    protected void playRound(Connection connection) {
+        int bet = handleBet(connection);
         // Deal cards
-        BlackjackHand playerHand = new BlackjackHand();
-        playerHand.addCard(deck.deal());
-        playerHand.addCard(deck.deal());
+        BlackjackHand playerHand = dealHand();
 
-        BlackjackHand dealerHand = new BlackjackHand();
-        dealerHand.addCard(deck.deal());
-        dealerHand.addCard(deck.deal());
+        BlackjackHand dealerHand = dealHand();
 
         // Play the round
         boolean roundOver = false;
@@ -85,6 +31,23 @@ public class BlackjackDealer {
         System.out.println("Round " + round + " - Result: " + roundResult.toUpperCase() + ", Player bet " + bet
                 + " chips. Stack is now " + stack);
         round++;
+    }
+
+    private int handleBet(Connection connection) {
+        // Send bet command
+        connection.write("bet:" + stack);
+        String betResponse = connection.read();
+        System.out.println("Received bet response: " + betResponse);
+        String[] betResponseParts = betResponse.split(":");
+        bet = Integer.parseInt(betResponseParts[1]);
+        return bet;
+    }
+
+    private BlackjackHand dealHand() {
+        BlackjackHand hand = new BlackjackHand();
+        hand.addCard(deck.deal());
+        hand.addCard(deck.deal());
+        return hand;
     }
 
     private boolean handlePlayerTurn(Connection connection, BlackjackHand playerHand, BlackjackHand dealerHand,
@@ -156,8 +119,7 @@ public class BlackjackDealer {
     }
 
     public static void main(String[] args) {
-        int dealerPort = DEFAULT_PORT;
-        BlackjackDealer dealer = new BlackjackDealer(dealerPort);
+        BlackjackDealer dealer = new BlackjackDealer(IP_PORT);
         dealer.start();
     }
 }

@@ -1,19 +1,14 @@
 /**
  * The AceyHand class represents a hand of playing cards in Acey.
  */
-class AceyHand {
-    private final Card[] hand;
+class AceyHand extends Hand {
     private int difference;
-    private int numCards;
-    private int value;
 
     /**
      * Constructs an empty AceyHand object.
      */
     public AceyHand() {
-        hand = new Card[3];
-        numCards = 0;
-        value = 0;
+        super(3);
     }
 
     /**
@@ -22,9 +17,7 @@ class AceyHand {
      * @param card The card to add.
      */
     public void addCard(Card card) {
-        hand[numCards] = card;
-        value += card.rank.toInt();
-        numCards++;
+        super.addCard(card);
         if (numCards == 2) {
             difference = Math.abs(hand[1].rank.toInt() - hand[0].rank.toInt());
         }
@@ -83,19 +76,7 @@ class AceyHand {
         return hand[2];
     }
 
-    public Card[] getHand() {
-        return hand;
-    }
-
     public int getDifference() {
         return difference;
-    }
-
-    public int getNumCards() {
-        return numCards;
-    }
-
-    public int getValue() {
-        return value;
     }
 }
