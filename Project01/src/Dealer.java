@@ -15,7 +15,7 @@ public abstract class Dealer {
         this.ipPort = ipPort;
         deck = new Deck();
         stack = STARTING_STACK;
-        round = 1;
+        round = 0;
     }
 
     protected void start() {
@@ -46,8 +46,8 @@ public abstract class Dealer {
 
     private void playGame(Connection connection) {
         while (stack > 1) {
-            playRound(connection);
             round++;
+            playRound(connection);
         }
     }
 

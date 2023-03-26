@@ -67,6 +67,15 @@ class Deck {
         return dealtCard;
     }
 
+    public String getDealtCards() {
+        String dealtCards = "";
+        for (int i = deck.length - 1; i >= numCards; i--) {
+            Card card = this.dealtCards[i];
+            dealtCards += ":" + card.toString();
+        }
+        return dealtCards;
+    }
+
     public int getNumCards() {
         return numCards;
     }
@@ -80,7 +89,7 @@ class Deck {
     public String toString() {
         String deck = "";
         deck += this.deck[0].toString();
-        for (int i = 1; i <= numCards; i++) {
+        for (int i = 1; i < numCards; i++) {
             Card card = this.deck[i];
             deck += ":" + card.toString();
         }

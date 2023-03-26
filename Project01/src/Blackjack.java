@@ -10,6 +10,9 @@
  */
 public class Blackjack {
     private Connection connection;
+    private int count;
+    private int numDecks;
+    private int cardsDealt;
 
     /**
      * Constructs a Blackjack object and connects to the server at the specified IP
@@ -21,17 +24,47 @@ public class Blackjack {
 
     public Blackjack(String ipAddress, int ipPort) {
         connection = new Connection(ipAddress, ipPort);
+        count = 0;
+        numDecks = 7;
+        cardsDealt = 0;
+    }
+
+    public int getTrueCount() {
+        double remainingDecks = (double) (numDecks * 52 - cardsDealt) / 52;
+        return (int) Math.round(count / remainingDecks);
+    }
+
+    public double getAdjustedAdvantage() {
+        int trueCount = getTrueCount();
+        // Adjust the player's advantage based on the true count
+        // This is a simplified example; you may use a different formula
+        return 0.02 + 0.005 * trueCount;
+    }
+
+    private void updateCount(Card card) {
+        int cardValue = card.rank.toInt();
+        if (cardValue >= 2 && cardValue <= 6) {
+            count++;
+        } else if (cardValue == 10 || cardValue == 1) {
+            count--;
+        }
+        cardsDealt++;
     }
 
     /**
-     * Determines the bet amount based on the player's bankroll.
-     * 
+     * Determines the bet amount based on the player's bankroll and the Kelly
+     * Criterion.
+     *
      * @param bankroll The player's current bankroll
      * @return The bet amount
      */
     public int getBet(int bankroll) {
-        // In this example, we bet 5% of the bankroll each round
-        return (int) Math.max(bankroll * 0.05, 1);
+        double advantage = getAdjustedAdvantage(); // Assuming a 2% advantage
+
+        // Calculate the bet amount based on the Kelly Criterion
+        double betAmount = bankroll * advantage;
+        // Ensure the bet is at least 1 and is an integer
+        return (int) Math.max(Math.round(betAmount), 1);
     }
 
     /**
@@ -42,22 +75,64 @@ public class Blackjack {
      * @param hand         The player's current hand
      */
     public void play(Card dealerUpcard, BlackjackHand hand) {
-        int numCards = hand.getNumCards();
         int handValue = hand.getValue();
-        Card[] cards = hand.getHand();
         int dealerUpcardValue = dealerUpcard.rank.toInt();
+        boolean isSoft = hand.isSoft();
 
         // Check for split
-        if (numCards == 2 && cards[0].rank.toString().equals(cards[1].rank.toString())) {
+        if (shouldSplit(hand, dealerUpcardValue)) {
             connection.write("split");
-        } // Check for double down
-        else if (handValue >= 9 && handValue <= 11 && numCards == 2) {
+            return;
+        }
+
+        // Check for double down
+        if (shouldDouble(hand, handValue, dealerUpcardValue)) {
             connection.write("double");
-        } // Implement hit or stand strategy based on dealer's upcard
-        else if (handValue < 17 && (dealerUpcardValue >= 7 || dealerUpcardValue == 11)) {
+            return;
+        }
+
+        // Implement hit or stand strategy based on dealer's upcard and softness of the
+        // hand
+        if (shouldHit(isSoft, handValue, dealerUpcardValue)) {
             connection.write("hit");
         } else {
             connection.write("stand");
+        }
+    }
+
+    private boolean shouldSplit(BlackjackHand hand, int dealerUpcardValue) {
+        int handValue = hand.getValue();
+
+        if (!hand.isSplittable()) {
+            return false;
+        }
+
+        if (handValue == 16 || hand.isSoft()) { // Split 8s and Aces
+            return true;
+        } else if ((handValue >= 4 && handValue <= 14) && (dealerUpcardValue <= 7 && dealerUpcardValue != 1)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean shouldDouble(BlackjackHand hand, int handValue, int dealerUpcardValue) {
+        int numCards = hand.getNumCards();
+
+        if (handValue >= 9 && handValue <= 11 && numCards == 2 && (dealerUpcardValue >= 3 && dealerUpcardValue <= 6)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean shouldHit(boolean isSoft, int handValue, int dealerUpcardValue) {
+        if (isSoft) {
+            return handValue <= 17 || (handValue == 18
+                    && (dealerUpcardValue == 9 || dealerUpcardValue == 10 || dealerUpcardValue == 1));
+        } else {
+            return handValue < 12
+                    || (handValue >= 12 && handValue <= 16 && (dealerUpcardValue >= 7 || dealerUpcardValue == 1));
         }
     }
 
@@ -87,6 +162,10 @@ public class Blackjack {
         int bankroll;
         try {
             bankroll = Integer.parseInt(commandParts[1]);
+            for (int i = 3; i < commandParts.length; i++) {
+                Card card = Card.fromString(commandParts[i]);
+                updateCount(card);
+            }
             connection.write("bet:" + getBet(bankroll));
         } catch (NumberFormatException e) {
             System.err
@@ -110,7 +189,8 @@ public class Blackjack {
         try {
             dealerUpCard = Card.fromString(commandParts[2]);
             for (int i = 4; i < commandParts.length; i++) {
-                hand.addCard(Card.fromString(commandParts[i]));
+                Card card = Card.fromString(commandParts[i]);
+                hand.addCard(card);
             }
             play(dealerUpCard, hand);
         } catch (IllegalArgumentException e) {
@@ -129,7 +209,7 @@ public class Blackjack {
         if (commandParts.length < 6) {
             throw new IllegalArgumentException("Invalid status message format");
         }
-        System.out.println("Result: " + commandParts[1] + " | Dealer score: " + commandParts[3] + " | Your score: "
+        System.out.println("Result: " + commandParts[1] + ", Dealer score: " + commandParts[3] + ", Your score: "
                 + commandParts[5]);
     }
 

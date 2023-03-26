@@ -19,7 +19,7 @@ class BlackjackHand extends Hand {
      */
     public void addCard(Card card) {
         super.addCard(card);
-        if (card.rank.toString().equals("A")) {
+        if (card.rank.toInt() == 1) {
             numAces++;
         }
     }
@@ -30,16 +30,29 @@ class BlackjackHand extends Hand {
      * @return The hand's value
      */
     public int getValue() {
+        int numAces = this.numAces;
         // Handle aces as either 1 or 11, depending on the hand value
-        while (value > 21 && numAces > 0) {
-            value -= 10;
+        while (value + 10 <= 21 && numAces > 0) {
+            value += 10;
             numAces--;
         }
         return super.getValue();
     }
 
+    public boolean isSoft() {
+        return numAces > 0 && value + 10 < 21;
+    }
+
+    public boolean isSplittable() {
+        return numCards == 2 && hand[0].rank.toInt() == hand[1].rank.toInt();
+    }
+
     public boolean isBust() {
         return getValue() > 21;
+    }
+
+    public boolean isBlackjack() {
+        return getValue() == 21;
     }
 
 }
