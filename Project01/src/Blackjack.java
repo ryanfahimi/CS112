@@ -74,13 +74,13 @@ public class Blackjack {
                         break;
 
                     case "bet":
-                        // handleBet(commandParts);
-                        connection.write("bet:1");
+                        handleBet(commandParts);
+                        // connection.write("bet:1");
                         break;
 
                     case "play":
-                        // handlePlay(commandParts);
-                        connection.write("stand");
+                        handlePlay(commandParts);
+                        // connection.write("stand");
                         break;
 
                     case "status":

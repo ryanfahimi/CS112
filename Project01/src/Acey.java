@@ -52,6 +52,7 @@ public class Acey {
                         handleLogin(commandParts);
                         break;
                     case "play":
+
                         handlePlay(commandParts);
                         break;
                     case "status":
@@ -99,7 +100,7 @@ public class Acey {
         AceyHand hand = new AceyHand();
 
         // Add cards to the hand
-        for (int i = 3; i < commandParts.length; i++) {
+        for (int i = 3; i < 5; i++) {
             Card card = Card.fromString(commandParts[i]);
             hand.addCard(card);
         }
@@ -134,7 +135,7 @@ public class Acey {
         }
         int bet = (int) (stack * confidence);
         bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
-        connection.write(decision + ":" + bet);
+        connection.write(decision + ":" + 0);
     }
 
     /**
