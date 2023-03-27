@@ -10,95 +10,28 @@ public class Acey {
     }
 
     /**
-     * Implements the player's Acey strategy based on the
-     * the player's current hand, bankroll amount, and the current pot.
-     * 
-     * @param hand  The player's current hand
-     * @param stack The player's bankroll amount
-     * @param pot   The current pot amount
-     */
-    private void makeBet(AceyHand hand, int stack, int pot) {
-        int difference = hand.getDifference();
-        double confidence;
-
-        String decision;
-        if (difference == 0) {
-            decision = hand.getValue() > 16 ? "low" : "high";
-            confidence = 0.3;
-        } else if (difference <= 4) {
-            decision = "mid";
-            confidence = 0;
-        } else {
-            decision = "mid";
-            confidence = 1.0 - (1.0 / difference);
-            confidence = Math.min(confidence, 0.7); // Limit the maximum confidence to 70% to avoid losing all chips
-        }
-        int bet = (int) (stack * confidence);
-        bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
-        connection.write(decision + ":" + bet);
-    }
-
-    /**
-     * Handles the login process with the provided message parts.
+     * The main method which initializes the Acey player and starts parsing
+     * commands.
      *
-     * @param commandParts The message parts containing the login information
-     * @throws IllegalArgumentException If the login message format is invalid
+     * @param args The command line arguments containing the IP address and port
      */
-    private void handleLogin(String[] commandParts) throws IllegalArgumentException {
-        if (commandParts.length < 1) {
-            throw new IllegalArgumentException("Invalid login message format");
-        }
-        connection.write("rfahimi:AceyDoesIt");
-    }
-
-    /**
-     * Handles the play and bet placing process with the provided message parts.
-     *
-     * @param commandParts The message parts containing the play information
-     * @throws IllegalArgumentException If the play message format is invalid
-     */
-    private void handlePlay(String[] commandParts) {
-        if (commandParts.length < 5) {
-            throw new IllegalArgumentException("Invalid play message format");
+    public static void main(String[] args) {
+        String ipAddress;
+        int ipPort;
+        try {
+            ipAddress = args[0];
+            ipPort = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            System.err.println("ERROR: Unable to initialize IP Port: IP Port is not a number: " + args[1]);
+            return;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println(
+                    "ERROR: Unable to initialize IP address and/or IP Port: Missing IP address and/or IP Port");
+            return;
         }
 
-        AceyHand hand = new AceyHand();
-
-        // Add cards to the hand
-        for (int i = 3; i < commandParts.length; i++) {
-            Card card = Card.fromString(commandParts[i]);
-            hand.addCard(card);
-        }
-        int pot = Integer.parseInt(commandParts[1]);
-        int stack = Integer.parseInt(commandParts[2]);
-        makeBet(hand, stack, pot);
-    }
-
-    /**
-     * Handles the status display process with the provided message parts.
-     *
-     * @param commandParts The message parts containing the status information
-     * @throws IllegalArgumentException If the status message format is invalid
-     */
-    private void handleStatus(String[] commandParts) {
-        if (commandParts.length < 5) {
-            throw new IllegalArgumentException("Invalid status message format");
-        }
-
-        System.out.println("Status: " + commandParts[1]);
-    }
-
-    /**
-     * Handles the completion of the game with the provided message parts.
-     *
-     * @param commandParts The message parts containing the completion information
-     * @throws IllegalArgumentException If the done message format is invalid
-     */
-    private void handleDone(String[] commandParts) {
-        if (commandParts.length < 2) {
-            throw new IllegalArgumentException("Invalid done message format");
-        }
-        System.out.println("Game result: " + commandParts[1]);
+        Acey player = new Acey(ipAddress, ipPort);
+        player.parseCommand();
     }
 
     /**
@@ -140,27 +73,95 @@ public class Acey {
     }
 
     /**
-     * The main method which initializes the Acey player and starts parsing
-     * commands.
+     * Handles the login process with the provided message parts.
      *
-     * @param args The command line arguments containing the IP address and port
+     * @param commandParts The message parts containing the login information
+     * @throws IllegalArgumentException If the login message format is invalid
      */
-    public static void main(String[] args) {
-        String ipAddress;
-        int ipPort;
-        try {
-            ipAddress = args[0];
-            ipPort = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            System.err.println("ERROR: Unable to initialize IP Port: IP Port is not a number: " + args[1]);
-            return;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println(
-                    "ERROR: Unable to initialize IP address and/or IP Port: Missing IP address and/or IP Port");
-            return;
+    private void handleLogin(String[] commandParts) throws IllegalArgumentException {
+        if (commandParts.length < 1) {
+            throw new IllegalArgumentException("Invalid login message format");
+        }
+        connection.write("rfahimi:AceyDoesIt");
+    }
+
+    /**
+     * Handles the play and bet placing process with the provided message parts.
+     *
+     * @param commandParts The message parts containing the play information
+     * @throws IllegalArgumentException If the play message format is invalid
+     */
+    private void handlePlay(String[] commandParts) {
+        if (commandParts.length < 6) {
+            throw new IllegalArgumentException("Invalid play message format");
         }
 
-        Acey player = new Acey(ipAddress, ipPort);
-        player.parseCommand();
+        AceyHand hand = new AceyHand();
+
+        // Add cards to the hand
+        for (int i = 3; i < commandParts.length; i++) {
+            Card card = Card.fromString(commandParts[i]);
+            hand.addCard(card);
+        }
+        int pot = Integer.parseInt(commandParts[1]);
+        int stack = Integer.parseInt(commandParts[2]);
+        placeBet(hand, stack, pot);
     }
+
+    /**
+     * Implements the player's Acey strategy based on the
+     * the player's current hand, bankroll amount, and the current pot.
+     * 
+     * @param hand  The player's current hand
+     * @param stack The player's bankroll amount
+     * @param pot   The current pot amount
+     */
+    private void placeBet(AceyHand hand, int stack, int pot) {
+        int difference = hand.getDifference();
+        double confidence;
+
+        String decision;
+        if (difference == 0) {
+            decision = hand.getValue() > 16 ? "low" : "high";
+            confidence = 0.3;
+        } else if (difference <= 4) {
+            decision = "mid";
+            confidence = 0;
+        } else {
+            decision = "mid";
+            confidence = 1.0 - (1.0 / difference);
+            confidence = Math.min(confidence, 0.7); // Limit the maximum confidence to 70% to avoid losing all chips
+        }
+        int bet = (int) (stack * confidence);
+        bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
+        connection.write(decision + ":" + bet);
+    }
+
+    /**
+     * Handles the status display process with the provided message parts.
+     *
+     * @param commandParts The message parts containing the status information
+     * @throws IllegalArgumentException If the status message format is invalid
+     */
+    private void handleStatus(String[] commandParts) {
+        if (commandParts.length < 5) {
+            throw new IllegalArgumentException("Invalid status message format");
+        }
+
+        System.out.println("Status: " + commandParts[1]);
+    }
+
+    /**
+     * Handles the completion of the game with the provided message parts.
+     *
+     * @param commandParts The message parts containing the completion information
+     * @throws IllegalArgumentException If the done message format is invalid
+     */
+    private void handleDone(String[] commandParts) {
+        if (commandParts.length < 2) {
+            throw new IllegalArgumentException("Invalid done message format");
+        }
+        System.out.println("Game result: " + commandParts[1]);
+    }
+
 }

@@ -1,9 +1,11 @@
 class AceyDealer extends Dealer {
+    private static final int DEALER_TAX_ROUND_INTERVAL = 10; // Adjust this value as needed
     private static final int ANTE = 1;
     private static final String HIGH = "high";
     private static final String LOW = "low";
     private static final String MID = "mid";
 
+    private AceyHand hand;
     private int pot;
 
     public AceyDealer(int ipPort) {
@@ -11,18 +13,24 @@ class AceyDealer extends Dealer {
     }
 
     @Override
-    protected void playRound(Connection connection) {
+    protected void playRound() {
         takeAnte();
-        AceyHand hand = dealHand();
-        String decision = handlePlayerTurn(connection, hand);
-        String roundResult = determineRoundResult(decision, hand);
-        sendStatus(roundResult, hand, connection);
+        if (stack > 0) {
+            hand = dealHand();
+            String decision = handleTurn();
+            String result = determineResult(decision);
+            sendStatus(result);
+            if (round % DEALER_TAX_ROUND_INTERVAL == 0) {
+                pot--; // Remove one chip from the pot
+            }
+        }
     }
 
     private void takeAnte() {
         if (pot == 0) {
             stack -= ANTE;
-            pot += ANTE;
+            pot += 2 * ANTE;
+            System.out.println("Took ante...");
         }
     }
 
@@ -34,12 +42,36 @@ class AceyDealer extends Dealer {
         return hand;
     }
 
-    private void sendPlayCommand(Connection connection, AceyHand hand) {
-        String playCommand = "play:" + pot + ":" + stack + ":" + hand;
-        connection.write(playCommand);
+    private String handleTurn() {
+        sendPlayCommand();
+        return parseResponse();
     }
 
-    private boolean isValidPlayerDecision(String decision, int bet, Connection connection) {
+    private void sendPlayCommand() {
+        String playCommand = "play:" + pot + ":" + stack + ":" + hand + "dealt:" + deck.getDealtCards();
+        connection.write(playCommand);
+        System.out.println("Pot: " + pot + ", Stack " + stack);
+    }
+
+    private String parseResponse() {
+        String response = connection.read();
+        System.out.println("Received play response... ");
+        String[] responseParts = response.split(":");
+        String decision = responseParts[0];
+        bet = Integer.parseInt(responseParts[1]);
+        System.out.println("Decision: " + decision + ", Bet: " + bet);
+
+        if (isValidPlayerDecision(decision)) {
+
+            pot += bet;
+            stack -= bet;
+            System.out.println("Pot: " + pot + ", Stack: " + stack);
+            return decision;
+        }
+        return null;
+    }
+
+    private boolean isValidPlayerDecision(String decision) {
         if (!(decision.equals(HIGH) || decision.equals(LOW) || decision.equals(MID))) {
             System.err.println("Invalid decision from player: " + decision);
             return false;
@@ -52,44 +84,39 @@ class AceyDealer extends Dealer {
         return true;
     }
 
-    private String parsePlayerResponse(Connection connection, AceyHand hand) {
-        String response = connection.read();
-        System.out.println("Received play response: " + response);
-        String[] responseParts = response.split(":");
-        String decision = responseParts[0];
-        int bet = Integer.parseInt(responseParts[1]);
-
-        if (isValidPlayerDecision(decision, bet, connection)) {
-
-            pot += bet;
-            stack -= bet;
-            System.out.println("Round " + round + " - Player bet " + bet + " chips. Pot is now " + pot
-                    + ". Stack is now " + stack);
-            return decision;
-        }
-        return null;
-    }
-
-    private String handlePlayerTurn(Connection connection, AceyHand hand) {
-        sendPlayCommand(connection, hand);
-        return parsePlayerResponse(connection, hand);
-    }
-
-    private String determineRoundResult(String decision, AceyHand hand) {
+    private String determineResult(String decision) {
         hand.addCard(deck.deal());
-        if (decision.equals("high") && hand.isHigh() || decision.equals("low") && hand.isLow()
-                || decision.equals("mid") && hand.isMid()) {
-            stack += pot;
-            pot = 0;
-            return "win";
+        boolean isWin = decision.equals("high") && hand.isHigh() || decision.equals("low") && hand.isLow()
+                || decision.equals("mid") && hand.isMid();
+
+        if (isWin) {
+            bet *= 2;
+            stack += bet; // Dealer takes the player's bet from the pot
+            pot -= bet; // Deduct the player's bet from the pot
         } else {
-            return "lose";
+            // The player loses, and the pot remains the same
+            // No need to update the dealer's stack, as it's already deducted in
+            // parsePlayerResponse()
+            if (hand.hasMatchingCard()) {
+                if (hand.hasAllMatchingCards()) {
+                    bet *= 2;
+                    stack -= bet; // Dealer contributes thrice the bet to the pot
+                    pot += bet; // Add thrice the bet to the pot
+                } else {
+                    stack -= bet; // Dealer contributes twice the bet to the pot
+                    pot += bet; // Add twice bet to the pot
+                }
+            }
         }
+        String result = isWin ? "win" : "lose";
+        System.out.println("Result: " + result + ", Bet: " + bet + "Hand: " + hand);
+        return result;
+
     }
 
-    private void sendStatus(String roundResult, AceyHand hand, Connection connection) {
+    private void sendStatus(String roundResult) {
         String statusCommand = "status:" + roundResult + ":" + hand;
-        System.out.println(statusCommand);
+        System.out.println("Pot:" + pot + ", Stack:" + stack);
         connection.write(statusCommand);
     }
 

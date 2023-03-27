@@ -6,8 +6,6 @@ class BlackjackDealer extends Dealer {
 
     private BlackjackHand playerHand;
     private BlackjackHand dealerHand;
-    private int bet;
-    private String result;
 
     public BlackjackDealer(int ipPort) {
         super(ipPort);
@@ -19,27 +17,30 @@ class BlackjackDealer extends Dealer {
     }
 
     @Override
-    protected void playRound(Connection connection) {
-        handleBet(connection);
+    protected void playRound() {
+        handleBet();
         // Deal cards
         dealInitialCards();
 
         // Play the round
-        handlePlayerTurn(connection);
-        handleDealerTurn();
+        handlePlayerTurn();
+        if (!playerHand.isBust()) {
+            handleDealerTurn();
+        }
 
         // Determine the winner and update the stack
-        determineRoundResult();
-        sendStatus(connection);
+        String result = determineResult();
+        sendStatus(result);
     }
 
-    private void handleBet(Connection connection) {
+    private void handleBet() {
         // Send bet command
         connection.write("bet:" + stack + deck.getDealtCards());
         String betResponse = connection.read();
-        System.out.println("Received bet response: " + betResponse);
+        System.out.println("Received bet response... ");
         String[] betResponseParts = betResponse.split(":");
         bet = Integer.parseInt(betResponseParts[1]);
+        bet = Math.min(bet, stack);
     }
 
     public void dealInitialCards() {
@@ -56,14 +57,6 @@ class BlackjackDealer extends Dealer {
         return hand;
     }
 
-    public void playerHit() {
-        playerHand.addCard(deck.deal());
-    }
-
-    public void dealerHit() {
-        dealerHand.addCard(deck.deal());
-    }
-
     private void handleDealerTurn() {
         // Play dealer's hand according to the game rules
         while (dealerHand.getValue() < 17) {
@@ -71,53 +64,25 @@ class BlackjackDealer extends Dealer {
         }
     }
 
-    private void sendPlayCommand(Connection connection) {
+    public void dealerHit() {
+        dealerHand.addCard(deck.deal());
+    }
+
+    private void handlePlayerTurn() {
+        boolean roundOver = false;
+        while (!roundOver) {
+            sendPlayCommand();
+            roundOver = processPlayerDecision();
+        }
+    }
+
+    private void sendPlayCommand() {
         Card dealerUpCard = dealerHand.getHand()[dealerHand.getNumCards() - 1];
         String playCommand = "play:dealer:" + dealerUpCard + ":you:" + playerHand;
         connection.write(playCommand);
     }
 
-    private BlackjackHand handleSplitHands(Card splitCard) {
-        // Create a new hand with the split card and deal a new card
-        BlackjackHand splitHand = new BlackjackHand();
-        splitHand.addCard(splitCard);
-        splitHand.addCard(deck.deal());
-        return splitHand;
-    }
-
-    private void handleSplit(Connection connection) {
-        if (playerHand.isSplittable()) {
-            BlackjackHand[] playerHands = { handleSplitHands(playerHand.getHand()[0]),
-                    handleSplitHands(playerHand.getHand()[1]) };
-
-            // Request bet for split hand
-            for (int i = 0; i < playerHands.length; i++) {
-                boolean isLastSplit = (i == playerHands.length - 1);
-                System.out.println("Received bet response: bet:" + bet);
-                this.playerHand = playerHands[i];
-                System.out.println(
-                        "Player Hand: " + playerHand + ", Value: " + playerHand.getValue() + ", Dealer Up Card: "
-                                + dealerHand.getHand()[1]);
-                handlePlayerTurn(connection);
-                if (!(isLastSplit)) {
-                    handleDealerTurn();
-                    determineRoundResult();
-                    sendStatus(connection);
-                }
-            }
-        } else {
-            System.err.println("Unsplittable");
-        }
-    }
-
-    private boolean isValidPlayerDecision(String decision) {
-        if (!(decision.equals(HIT) || decision.equals(STAND) || decision.equals(DOUBLE) || decision.equals(SPLIT))) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean processPlayerDecision(Connection connection) {
+    private boolean processPlayerDecision() {
         String decision = connection.read();
         boolean roundOver = false;
 
@@ -125,7 +90,7 @@ class BlackjackDealer extends Dealer {
 
             switch (decision) {
                 case HIT:
-                    playerHand.addCard(deck.deal());
+                    playerHit();
                     break;
 
                 case STAND:
@@ -133,16 +98,13 @@ class BlackjackDealer extends Dealer {
                     break;
 
                 case DOUBLE:
-                    bet *= 2;
-                    playerHand.addCard(deck.deal());
-                    roundOver = true;
+                    roundOver = handleDouble();
                     break;
-
                 case SPLIT:
                     System.out.println(
                             "Player Decision: " + decision.toUpperCase() + ", Player Hand " + playerHand + ", Value: "
                                     + playerHand.getValue());
-                    handleSplit(connection);
+                    handleSplit();
                     return true;
             }
 
@@ -161,34 +123,94 @@ class BlackjackDealer extends Dealer {
         return roundOver;
     }
 
-    private void handlePlayerTurn(Connection connection) {
-        boolean roundOver = false;
-        while (!roundOver) {
-            sendPlayCommand(connection);
-            roundOver = processPlayerDecision(connection);
+    private boolean isValidPlayerDecision(String decision) {
+        if (decision == null || !(decision.equals(HIT) || decision.equals(STAND) || decision.equals(DOUBLE)
+                || decision.equals(SPLIT))) {
+            return false;
         }
+        return true;
     }
 
-    private void determineRoundResult() {
-        if (playerHand.isBust() || (!dealerHand.isBust() && dealerHand.getValue() > playerHand.getValue())) {
-            result = "lose";
-            stack -= bet;
-        } else if (dealerHand.isBust() || playerHand.getValue() > dealerHand.getValue()) {
-            result = "win";
-            stack += bet;
+    private void playerHit() {
+        playerHand.addCard(deck.deal());
+    }
+
+    private boolean handleDouble() {
+        if (stack >= bet * 2) {
+            bet *= 2;
+            playerHand.addCard(deck.deal());
         } else {
-            result = "push";
+            System.err.println("Not enough stack to double.");
+        }
+        return true;
+    }
+
+    private void handleSplit() {
+        if (playerHand.isSplittable()) {
+            BlackjackHand[] splitHands = { dealSplitHand(playerHand.getHand()[0]),
+                    dealSplitHand(playerHand.getHand()[1]) };
+
+            if (stack >= bet * 2) {
+                // Request bet for split hand
+                for (int i = 0; i < splitHands.length; i++) {
+                    boolean isLastSplit = (i == 1);
+                    System.out.println("Received bet response: bet:" + bet);
+                    playerHand = splitHands[i];
+                    System.out.println(
+                            "Player Hand: " + playerHand + ", Value: " + playerHand.getValue() + ", Dealer Up Card: "
+                                    + dealerHand.getHand()[1]);
+                    handlePlayerTurn();
+                    if (!isLastSplit) {
+                        if (!playerHand.isBust()) {
+                            handleDealerTurn();
+                        }
+                        String result = determineResult();
+                        sendStatus(result);
+                    }
+                }
+            } else {
+                System.err.println("Not enough stack to split.");
+            }
+        } else {
+            System.err.println("Unsplittable");
         }
     }
 
-    private void sendStatus(Connection connection) {
+    private BlackjackHand dealSplitHand(Card splitCard) {
+        // Create a new hand with the split card and deal a new card
+        BlackjackHand splitHand = new BlackjackHand();
+        splitHand.addCard(splitCard);
+        splitHand.addCard(deck.deal());
+        return splitHand;
+    }
+
+    private String determineResult() {
+        if (playerHand.isBust()) {
+            stack -= bet;
+            return "lose";
+        } else if (playerHand.isBlackjack() && !dealerHand.isBlackjack()) {
+            bet *= 1.5;
+            stack += bet; // Blackjack pays 3:2
+            return "win";
+        } else if (dealerHand.isBust() || playerHand.getValue() > dealerHand.getValue()) {
+            stack += bet;
+            return "win";
+        } else if (playerHand.getValue() < dealerHand.getValue()) {
+            stack -= bet;
+            return "lose";
+        } else {
+            return "push";
+        }
+    }
+
+    private void sendStatus(String result) {
         // Send round result to the player
         connection.write("status:" + result + ":dealer:" + dealerHand.getValue() + ":you:" + playerHand.getValue());
 
         // Print the round result
         System.out.println(
-                "Round " + round + "- Result: " + result.toUpperCase() + ", Dealer Score:" + dealerHand.getValue()
-                        + ", Player Score:" + playerHand.getValue() + ", Player Bet: " + bet
-                        + " chips. Stack is now " + stack);
+                "Result: " + result.toUpperCase() + ", Dealer Score:" + dealerHand.getValue()
+                        + ", Player Score:" + playerHand.getValue() + ", Bet: " + bet
+                        + ", Stack: " + stack);
     }
 }

@@ -62,6 +62,20 @@ class AceyHand extends Hand {
                 || (secondRank < thirdRank && thirdRank < firstRank);
     }
 
+    public boolean hasMatchingCard() {
+        int firstRank = getFirstCard().rank.toInt();
+        int secondRank = getSecondCard().rank.toInt();
+        int thirdRank = getThirdCard().rank.toInt();
+        return firstRank == thirdRank || secondRank == thirdRank;
+    }
+
+    public boolean hasAllMatchingCards() {
+        int firstRank = getFirstCard().rank.toInt();
+        int secondRank = getSecondCard().rank.toInt();
+        int thirdRank = getThirdCard().rank.toInt();
+        return firstRank == thirdRank && secondRank == thirdRank;
+    }
+
     // Getters
 
     public Card getFirstCard() {

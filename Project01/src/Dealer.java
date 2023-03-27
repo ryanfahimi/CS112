@@ -4,12 +4,14 @@ import java.net.Socket;
 
 public abstract class Dealer {
     protected static final int IP_PORT = 8080;
-    protected static final int STARTING_STACK = 50;
+    protected static final int STARTING_STACK = 500;
 
     protected int ipPort;
     protected Deck deck;
     protected int stack;
+    protected int bet;
     protected int round;
+    protected Connection connection;
 
     public Dealer(int ipPort) {
         this.ipPort = ipPort;
@@ -32,30 +34,33 @@ public abstract class Dealer {
     }
 
     private void handleClient(Socket clientSocket) {
-        Connection connection = new Connection(clientSocket);
+        connection = new Connection(clientSocket);
 
         // Send login command
-        sendLoginCommand(connection);
+        sendLoginCommand();
 
-        playGame(connection);
+        playGame();
 
         // Finish game
         connection.write("done:Out of chips");
+        System.out.println("Done: Out of chips");
         connection.close();
     }
 
-    private void playGame(Connection connection) {
-        while (stack > 1) {
-            round++;
-            playRound(connection);
-        }
-    }
-
-    protected abstract void playRound(Connection connection);
-
-    protected void sendLoginCommand(Connection connection) {
+    protected void sendLoginCommand() {
         connection.write("login");
         String loginResponse = connection.read();
         System.out.println("Received login response: " + loginResponse);
     }
+
+    private void playGame() {
+        while (stack > 0) {
+            round++;
+            System.out.println("ROUND: " + round);
+            playRound();
+        }
+    }
+
+    protected abstract void playRound();
+
 }
