@@ -2,6 +2,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Abstract class representing a card game dealer.
+ * Contains the basic functionality to connect to a client, handle
+ * communication,
+ * and play a game.
+ */
 public abstract class Dealer {
     protected static final int IP_PORT = 8080;
     protected static final int STARTING_STACK = 500;
@@ -13,6 +19,11 @@ public abstract class Dealer {
     protected int round;
     protected Connection connection;
 
+    /**
+     * Constructs a new Dealer instance.
+     *
+     * @param ipPort the IP port to be used for the connection.
+     */
     public Dealer(int ipPort) {
         this.ipPort = ipPort;
         deck = new Deck();
@@ -20,6 +31,9 @@ public abstract class Dealer {
         round = 0;
     }
 
+    /**
+     * Starts the server and accepts a client connection.
+     */
     protected void start() {
         try (ServerSocket serverSocket = new ServerSocket(ipPort)) {
             System.out.println("Dealer Server is running...");
@@ -33,26 +47,33 @@ public abstract class Dealer {
         }
     }
 
+    /**
+     * Handles communication with the client.
+     *
+     * @param clientSocket the socket representing the client connection.
+     */
     private void handleClient(Socket clientSocket) {
         connection = new Connection(clientSocket);
 
-        // Send login command
         sendLoginCommand();
 
         playGame();
 
-        // Finish game
-        connection.write("done:Out of chips");
-        System.out.println("Done: Out of chips");
-        connection.close();
+        finishGame();
     }
 
+    /**
+     * Sends a login command to the client.
+     */
     protected void sendLoginCommand() {
         connection.write("login");
         String loginResponse = connection.read();
         System.out.println("Received login response: " + loginResponse);
     }
 
+    /**
+     * Plays the game as long as there are chips in the stack.
+     */
     private void playGame() {
         while (stack > 0) {
             round++;
@@ -61,6 +82,19 @@ public abstract class Dealer {
         }
     }
 
+    /*
+     * Sends a done command to the client and closes the connection.
+     */
+    private void finishGame() {
+        connection.write("done:Out of chips");
+        System.out.println("Done: Out of chips");
+        connection.close();
+    }
+
+    /**
+     * Abstract method to play a single round of the game.
+     * Must be implemented in a subclass.
+     */
     protected abstract void playRound();
 
 }

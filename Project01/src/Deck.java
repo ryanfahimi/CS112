@@ -67,11 +67,16 @@ class Deck {
         return dealtCard;
     }
 
+    /**
+     * Returns a string representation of the cards that have been dealt.
+     *
+     * @return the string representation of the dealt cards
+     */
     public String getDealtCards() {
         String dealtCards = "";
         for (int i = deck.length - 1; i >= numCards; i--) {
-            Card card = this.dealtCards[i];
-            dealtCards += ":" + card.toString();
+            Card dealtCard = this.dealtCards[i];
+            dealtCards += ":" + dealtCard.toString();
         }
         return dealtCards;
     }

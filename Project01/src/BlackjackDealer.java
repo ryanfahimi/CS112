@@ -1,3 +1,7 @@
+/**
+ * An implementation of the Dealer class for the card game Blackjack.
+ * Handles the game-specific logic and interactions with the client.
+ */
 class BlackjackDealer extends Dealer {
     private static final String HIT = "hit";
     private static final String STAND = "stand";
@@ -7,6 +11,11 @@ class BlackjackDealer extends Dealer {
     private BlackjackHand playerHand;
     private BlackjackHand dealerHand;
 
+    /**
+     * Constructs a new BlackjackDealer instance.
+     *
+     * @param ipPort the IP port to be used for the connection.
+     */
     public BlackjackDealer(int ipPort) {
         super(ipPort);
     }
@@ -16,33 +25,38 @@ class BlackjackDealer extends Dealer {
         dealer.start();
     }
 
+    /**
+     * Plays a single round of the Blackjack game.
+     */
     @Override
     protected void playRound() {
         handleBet();
-        // Deal cards
         dealInitialCards();
 
-        // Play the round
         handlePlayerTurn();
         if (!playerHand.isBust()) {
             handleDealerTurn();
         }
 
-        // Determine the winner and update the stack
         String result = determineResult();
         sendStatus(result);
     }
 
+    /**
+     * Handles the player's bet.
+     */
     private void handleBet() {
-        // Send bet command
         connection.write("bet:" + stack + deck.getDealtCards());
         String betResponse = connection.read();
-        System.out.println("Received bet response... ");
         String[] betResponseParts = betResponse.split(":");
         bet = Integer.parseInt(betResponseParts[1]);
         bet = Math.min(bet, stack);
+        System.out.println("Bet: " + bet);
     }
 
+    /**
+     * Deals the initial cards to the player and the dealer.
+     */
     public void dealInitialCards() {
         playerHand = dealHand();
         dealerHand = dealHand();
@@ -50,6 +64,11 @@ class BlackjackDealer extends Dealer {
                 + dealerHand.getHand()[1]);
     }
 
+    /**
+     * Deals a new Blackjack hand.
+     *
+     * @return the dealt BlackjackHand.
+     */
     private BlackjackHand dealHand() {
         BlackjackHand hand = new BlackjackHand();
         hand.addCard(deck.deal());
@@ -57,17 +76,27 @@ class BlackjackDealer extends Dealer {
         return hand;
     }
 
+    /**
+     * Handles the dealer's turn.
+     */
     private void handleDealerTurn() {
-        // Play dealer's hand according to the game rules
         while (dealerHand.getValue() < 17) {
             dealerHit();
         }
     }
 
+    /**
+     * Performs a hit action for the dealer.
+     */
     public void dealerHit() {
         dealerHand.addCard(deck.deal());
     }
 
+    /**
+     * Handles the player's turn, including sending the play command and processing
+     * the
+     * player decision.
+     */
     private void handlePlayerTurn() {
         boolean roundOver = false;
         while (!roundOver) {
@@ -76,12 +105,20 @@ class BlackjackDealer extends Dealer {
         }
     }
 
+    /**
+     * Sends the play command to the client.
+     */
     private void sendPlayCommand() {
         Card dealerUpCard = dealerHand.getHand()[dealerHand.getNumCards() - 1];
         String playCommand = "play:dealer:" + dealerUpCard + ":you:" + playerHand;
         connection.write(playCommand);
     }
 
+    /**
+     * Processes the player's decision.
+     *
+     * @return true if the round is over, false otherwise.
+     */
     private boolean processPlayerDecision() {
         String decision = connection.read();
         boolean roundOver = false;
@@ -108,7 +145,6 @@ class BlackjackDealer extends Dealer {
                     return true;
             }
 
-            // Check for player bust
             if (playerHand.isBust()) {
                 roundOver = true;
             }
@@ -123,6 +159,12 @@ class BlackjackDealer extends Dealer {
         return roundOver;
     }
 
+    /**
+     * Checks if the player's decision is valid.
+     *
+     * @param decision the decision made by the player.
+     * @return true if the decision is valid, false otherwise.
+     */
     private boolean isValidPlayerDecision(String decision) {
         if (decision == null || !(decision.equals(HIT) || decision.equals(STAND) || decision.equals(DOUBLE)
                 || decision.equals(SPLIT))) {
@@ -131,10 +173,18 @@ class BlackjackDealer extends Dealer {
         return true;
     }
 
+    /**
+     * Performs a hit action for the player.
+     */
     private void playerHit() {
         playerHand.addCard(deck.deal());
     }
 
+    /**
+     * Handles the player's double decision.
+     *
+     * @return true if the round is over, false otherwise.
+     */
     private boolean handleDouble() {
         if (stack >= bet * 2) {
             bet *= 2;
@@ -145,13 +195,15 @@ class BlackjackDealer extends Dealer {
         return true;
     }
 
+    /**
+     * Handles the player's split decision.
+     */
     private void handleSplit() {
         if (playerHand.isSplittable()) {
             BlackjackHand[] splitHands = { dealSplitHand(playerHand.getHand()[0]),
                     dealSplitHand(playerHand.getHand()[1]) };
 
             if (stack >= bet * 2) {
-                // Request bet for split hand
                 for (int i = 0; i < splitHands.length; i++) {
                     boolean isLastSplit = (i == 1);
                     System.out.println("Received bet response: bet:" + bet);
@@ -176,14 +228,25 @@ class BlackjackDealer extends Dealer {
         }
     }
 
+    /**
+     * Deals a split hand for the player.
+     *
+     * @param splitCard the card to be split.
+     * @return the dealt BlackjackHand.
+     */
     private BlackjackHand dealSplitHand(Card splitCard) {
-        // Create a new hand with the split card and deal a new card
         BlackjackHand splitHand = new BlackjackHand();
         splitHand.addCard(splitCard);
         splitHand.addCard(deck.deal());
         return splitHand;
     }
 
+    /**
+     * Determines the result of the round based on the player's and dealer's hands.
+     *
+     * @return a string representing the result of the round ("win", "lose", or
+     *         "push").
+     */
     private String determineResult() {
         if (playerHand.isBust()) {
             stack -= bet;
@@ -203,11 +266,15 @@ class BlackjackDealer extends Dealer {
         }
     }
 
+    /**
+     * Sends the round status to the client.
+     *
+     * @param result a string representing the result of the round ("win", "lose",
+     *               or "push").
+     */
     private void sendStatus(String result) {
-        // Send round result to the player
         connection.write("status:" + result + ":dealer:" + dealerHand.getValue() + ":you:" + playerHand.getValue());
 
-        // Print the round result
         System.out.println(
                 "Result: " + result.toUpperCase() + ", Dealer Score:" + dealerHand.getValue()
                         + ", Player Score:" + playerHand.getValue() + ", Bet: " + bet

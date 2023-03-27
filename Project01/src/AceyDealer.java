@@ -1,3 +1,7 @@
+/**
+ * An implementation of the Dealer class for the card game Acey-Deucey.
+ * Handles the game-specific logic and interactions with the client.
+ */
 class AceyDealer extends Dealer {
     private static final int DEALER_TAX_ROUND_INTERVAL = 10; // Adjust this value as needed
     private static final int ANTE = 1;
@@ -8,10 +12,23 @@ class AceyDealer extends Dealer {
     private AceyHand hand;
     private int pot;
 
+    /**
+     * Constructs a new AceyDealer instance.
+     *
+     * @param ipPort the IP port to be used for the connection.
+     */
     public AceyDealer(int ipPort) {
         super(ipPort);
     }
 
+    public static void main(String[] args) {
+        AceyDealer dealer = new AceyDealer(IP_PORT);
+        dealer.start();
+    }
+
+    /**
+     * Plays a single round of the Acey-Deucey game.
+     */
     @Override
     protected void playRound() {
         takeAnte();
@@ -21,19 +38,27 @@ class AceyDealer extends Dealer {
             String result = determineResult(decision);
             sendStatus(result);
             if (round % DEALER_TAX_ROUND_INTERVAL == 0) {
-                pot--; // Remove one chip from the pot
+                pot--;
             }
         }
     }
 
+    /**
+     * Takes the ante from the player.
+     */
     private void takeAnte() {
         if (pot == 0) {
             stack -= ANTE;
-            pot += 2 * ANTE;
+            pot += ANTE;
             System.out.println("Took ante...");
         }
     }
 
+    /**
+     * Deals a new hand to the player.
+     *
+     * @return the dealt AceyHand.
+     */
     private AceyHand dealHand() {
         AceyHand hand = new AceyHand();
         hand.addCard(deck.deal());
@@ -42,17 +67,31 @@ class AceyDealer extends Dealer {
         return hand;
     }
 
+    /**
+     * Handles the player's turn, including sending the play command and parsing the
+     * response.
+     *
+     * @return the player's decision.
+     */
     private String handleTurn() {
         sendPlayCommand();
         return parseResponse();
     }
 
+    /**
+     * Sends the play command to the client.
+     */
     private void sendPlayCommand() {
         String playCommand = "play:" + pot + ":" + stack + ":" + hand + "dealt:" + deck.getDealtCards();
         connection.write(playCommand);
         System.out.println("Pot: " + pot + ", Stack " + stack);
     }
 
+    /**
+     * Parses the response received from the client.
+     *
+     * @return the player's decision.
+     */
     private String parseResponse() {
         String response = connection.read();
         System.out.println("Received play response... ");
@@ -71,6 +110,12 @@ class AceyDealer extends Dealer {
         return null;
     }
 
+    /**
+     * Checks if the player's decision is valid.
+     *
+     * @param decision the decision made by the player.
+     * @return true if the decision is valid, false otherwise.
+     */
     private boolean isValidPlayerDecision(String decision) {
         if (!(decision.equals(HIGH) || decision.equals(LOW) || decision.equals(MID))) {
             System.err.println("Invalid decision from player: " + decision);
@@ -84,15 +129,20 @@ class AceyDealer extends Dealer {
         return true;
     }
 
+    /**
+     * Determines the result of the round based on the player's decision.
+     *
+     * @param decision the decision made by the player.
+     * @return a string representing the result of the round ("win" or "lose").
+     */
     private String determineResult(String decision) {
         hand.addCard(deck.deal());
         boolean isWin = decision.equals("high") && hand.isHigh() || decision.equals("low") && hand.isLow()
                 || decision.equals("mid") && hand.isMid();
 
         if (isWin) {
-            bet *= 2;
-            stack += bet; // Dealer takes the player's bet from the pot
-            pot -= bet; // Deduct the player's bet from the pot
+            stack += bet * 2;
+            pot -= bet * 2;
         } else {
             // The player loses, and the pot remains the same
             // No need to update the dealer's stack, as it's already deducted in
@@ -114,14 +164,16 @@ class AceyDealer extends Dealer {
 
     }
 
-    private void sendStatus(String roundResult) {
-        String statusCommand = "status:" + roundResult + ":" + hand;
+    /**
+     * Sends the round status to the client.
+     *
+     * @param result a string representing the result of the round ("win" or
+     *               "lose").
+     */
+    private void sendStatus(String result) {
+        String statusCommand = "status:" + result + ":" + hand;
         System.out.println("Pot:" + pot + ", Stack:" + stack);
         connection.write(statusCommand);
     }
 
-    public static void main(String[] args) {
-        AceyDealer dealer = new AceyDealer(IP_PORT);
-        dealer.start();
-    }
 }

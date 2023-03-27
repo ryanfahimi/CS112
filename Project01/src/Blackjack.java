@@ -137,6 +137,11 @@ public class Blackjack {
         }
     }
 
+    /**
+     * Updates the card count based on the cards received from the server.
+     *
+     * @param commandParts The message parts containing the card information
+     */
     private void updateCount(String[] commandParts) {
         count = 0;
         for (int i = 3; i < commandParts.length; i++) {
@@ -155,26 +160,32 @@ public class Blackjack {
      * Determines the bet amount based on the player's bankroll and the Kelly
      * Criterion.
      *
-     * @param stack The player's current bankroll
      * @return The bet amount
      */
     public int getBet() {
-        double advantage = getAdjustedAdvantage(); // Assuming a 2% advantage
+        double advantage = getAdjustedAdvantage();
 
-        // Calculate the bet amount based on the Kelly Criterion
         double betAmount = stack * advantage;
         // Ensure the bet is at least 1 and is an integer
         bet = (int) Math.max(Math.round(betAmount), 1);
         return bet;
     }
 
+    /**
+     * Calculates the player's adjusted advantage based on the true count.
+     *
+     * @return The adjusted advantage
+     */
     public double getAdjustedAdvantage() {
         int trueCount = getTrueCount();
-        // Adjust the player's advantage based on the true count
-        // This is a simplified example; you may use a different formula
         return 0.05 + 0.01 * trueCount;
     }
 
+    /**
+     * Calculates the true count based on the card count and the remaining decks.
+     *
+     * @return The true count
+     */
     public int getTrueCount() {
         double remainingDecks = (double) (NUM_DECKS * 52 - dealtCards) / 52;
         return (int) Math.round(count / remainingDecks);
@@ -217,20 +228,16 @@ public class Blackjack {
         int dealerUpcardValue = dealerUpcard.rank.toInt();
         boolean isSoft = hand.isSoft();
 
-        // Check for split
         if (shouldSplit(hand, dealerUpcardValue)) {
             connection.write("split");
             return;
         }
 
-        // Check for double down
         if (shouldDouble(hand, handValue, dealerUpcardValue)) {
             connection.write("double");
             return;
         }
 
-        // Implement hit or stand strategy based on dealer's upcard and softness of the
-        // hand
         if (shouldHit(isSoft, handValue, dealerUpcardValue)) {
             connection.write("hit");
         } else {
@@ -238,6 +245,14 @@ public class Blackjack {
         }
     }
 
+    /**
+     * Determines whether the player should split based on the current hand and the
+     * dealer's upcard value.
+     * 
+     * @param hand              The player's current hand
+     * @param dealerUpcardValue The dealer's upcard value
+     * @return true if the player should split, false otherwise
+     */
     private boolean shouldSplit(BlackjackHand hand, int dealerUpcardValue) {
         int handValue = hand.getValue();
 
@@ -254,6 +269,15 @@ public class Blackjack {
         return false;
     }
 
+    /**
+     * Determines whether the player should double down based on the current hand,
+     * hand value, and the dealer's upcard value.
+     * 
+     * @param hand              The player's current hand
+     * @param handValue         The value of the player's hand
+     * @param dealerUpcardValue The dealer's upcard value
+     * @return true if the player should double down, false otherwise
+     */
     private boolean shouldDouble(BlackjackHand hand, int handValue, int dealerUpcardValue) {
         int numCards = hand.getNumCards();
 
@@ -265,6 +289,15 @@ public class Blackjack {
         return false;
     }
 
+    /**
+     * Determines whether the player should hit based on the softness of the hand,
+     * hand value, and the dealer's upcard value.
+     * 
+     * @param isSoft            A boolean indicating if the hand is soft
+     * @param handValue         The value of the player's hand
+     * @param dealerUpcardValue The dealer's upcard value
+     * @return true if the player should hit, false otherwise
+     */
     private boolean shouldHit(boolean isSoft, int handValue, int dealerUpcardValue) {
         if (isSoft) {
             return handValue <= 17 || (handValue == 18
