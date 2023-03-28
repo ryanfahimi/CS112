@@ -3,7 +3,7 @@
  * Handles the game-specific logic and interactions with the client.
  */
 class AceyDealer extends Dealer {
-    private static final int DEALER_TAX_ROUND_INTERVAL = 10; // Adjust this value as needed
+    private static final int DEALER_TAX_ROUND_INTERVAL = 20; // Adjust this value as needed
     private static final int ANTE = 1;
     private static final String HIGH = "high";
     private static final String LOW = "low";
@@ -37,7 +37,7 @@ class AceyDealer extends Dealer {
             String decision = handleTurn();
             String result = determineResult(decision);
             sendStatus(result);
-            if (round % DEALER_TAX_ROUND_INTERVAL == 0) {
+            if (round % DEALER_TAX_ROUND_INTERVAL == 0 && pot > 0) {
                 pot--;
             }
         }
@@ -82,7 +82,7 @@ class AceyDealer extends Dealer {
      * Sends the play command to the client.
      */
     private void sendPlayCommand() {
-        String playCommand = "play:" + pot + ":" + stack + ":" + hand + "dealt:" + deck.getDealtCards();
+        String playCommand = "play:" + pot + ":" + stack + ":" + hand + ":dealt" + deck.getDealtCards();
         connection.write(playCommand);
         System.out.println("Pot: " + pot + ", Stack " + stack);
     }
@@ -121,8 +121,8 @@ class AceyDealer extends Dealer {
             System.err.println("Invalid decision from player: " + decision);
             return false;
         }
-        if (bet > stack || bet > pot) {
-            System.err.println("Cheating detected: Player attempted to bet more than allowed.");
+        if (bet > stack || bet > pot || bet < 0) {
+            System.err.println("Cheating detected: Player attempted to bet more or less than allowed.");
             connection.write("done:Cheating");
             return false;
         }
@@ -147,8 +147,8 @@ class AceyDealer extends Dealer {
             // The player loses, and the pot remains the same
             // No need to update the dealer's stack, as it's already deducted in
             // parsePlayerResponse()
-            if (hand.hasMatchingCard()) {
-                if (hand.hasAllMatchingCards()) {
+            if (hand.thirdCardMatchesCard()) {
+                if (hand.thirdCardMatchesCards()) {
                     bet *= 2;
                     stack -= bet; // Dealer contributes thrice the bet to the pot
                     pot += bet; // Add thrice the bet to the pot
@@ -158,8 +158,8 @@ class AceyDealer extends Dealer {
                 }
             }
         }
-        String result = isWin ? "win" : "lose";
-        System.out.println("Result: " + result + ", Bet: " + bet + "Hand: " + hand);
+        String result = isWin ? WIN : LOSE;
+        System.out.println("Result: " + result + ", Bet: " + bet + ", Hand: " + hand);
         return result;
 
     }
@@ -172,7 +172,7 @@ class AceyDealer extends Dealer {
      */
     private void sendStatus(String result) {
         String statusCommand = "status:" + result + ":" + hand;
-        System.out.println("Pot:" + pot + ", Stack:" + stack);
+        System.out.println("Pot: " + pot + ", Stack: " + stack);
         connection.write(statusCommand);
     }
 

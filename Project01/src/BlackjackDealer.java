@@ -7,6 +7,7 @@ class BlackjackDealer extends Dealer {
     private static final String STAND = "stand";
     private static final String DOUBLE = "double";
     private static final String SPLIT = "split";
+    private static final String PUSH = "push";
 
     private BlackjackHand playerHand;
     private BlackjackHand dealerHand;
@@ -139,7 +140,7 @@ class BlackjackDealer extends Dealer {
                     break;
                 case SPLIT:
                     System.out.println(
-                            "Player Decision: " + decision.toUpperCase() + ", Player Hand " + playerHand + ", Value: "
+                            "Player Decision: " + decision.toUpperCase() + ", Player Hand: " + playerHand + ", Value: "
                                     + playerHand.getValue());
                     handleSplit();
                     return true;
@@ -150,7 +151,7 @@ class BlackjackDealer extends Dealer {
             }
 
             System.out.println(
-                    "Player Decision: " + decision.toUpperCase() + ", Player Hand " + playerHand + ", Value: "
+                    "Player Decision: " + decision.toUpperCase() + ", Player Hand: " + playerHand + ", Value: "
                             + playerHand.getValue());
         } else {
             System.err.println("Invalid response from player: " + decision);
@@ -199,7 +200,7 @@ class BlackjackDealer extends Dealer {
      * Handles the player's split decision.
      */
     private void handleSplit() {
-        if (playerHand.isSplittable()) {
+        if (playerHand.isPair()) {
             BlackjackHand[] splitHands = { dealSplitHand(playerHand.getHand()[0]),
                     dealSplitHand(playerHand.getHand()[1]) };
 
@@ -250,19 +251,19 @@ class BlackjackDealer extends Dealer {
     private String determineResult() {
         if (playerHand.isBust()) {
             stack -= bet;
-            return "lose";
+            return LOSE;
         } else if (playerHand.isBlackjack() && !dealerHand.isBlackjack()) {
             bet *= 1.5;
             stack += bet; // Blackjack pays 3:2
-            return "win";
+            return WIN;
         } else if (dealerHand.isBust() || playerHand.getValue() > dealerHand.getValue()) {
             stack += bet;
-            return "win";
+            return WIN;
         } else if (playerHand.getValue() < dealerHand.getValue()) {
             stack -= bet;
-            return "lose";
+            return LOSE;
         } else {
-            return "push";
+            return PUSH;
         }
     }
 
@@ -273,7 +274,13 @@ class BlackjackDealer extends Dealer {
      *               or "push").
      */
     private void sendStatus(String result) {
-        connection.write("status:" + result + ":dealer:" + dealerHand.getValue() + ":you:" + playerHand.getValue());
+        if (playerHand.isBust()) {
+            connection.write("status:" + result + ":you:" + playerHand.getValue());
+        } else if (playerHand.isBlackjack() && !dealerHand.isBlackjack()) {
+            connection.write("status:" + result + ":you:blackjack");
+        } else {
+            connection.write("status:" + result + ":dealer:" + dealerHand.getValue() + ":you:" + playerHand.getValue());
+        }
 
         System.out.println(
                 "Result: " + result.toUpperCase() + ", Dealer Score:" + dealerHand.getValue()

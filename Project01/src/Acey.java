@@ -1,3 +1,9 @@
+/*
+ * filename: Acey.java
+ * Contains classes that represent a AceyDeucey player client that interacts with the dealer server
+ * Author: Ryan Fahimi
+ */
+
 /**
  * The Acey class represents a simple AceyDeucey player that connects to a
  * server and plays a game of AceyDeucey.
@@ -52,7 +58,6 @@ public class Acey {
                         handleLogin(commandParts);
                         break;
                     case "play":
-
                         handlePlay(commandParts);
                         break;
                     case "status":
@@ -93,6 +98,8 @@ public class Acey {
      * @throws IllegalArgumentException If the play message format is invalid
      */
     private void handlePlay(String[] commandParts) {
+        int dealtCardsInt = 0;
+        Card[] dealtCardsArray = new Card[364];
         if (commandParts.length < 6) {
             throw new IllegalArgumentException("Invalid play message format");
         }
@@ -104,35 +111,49 @@ public class Acey {
             Card card = Card.fromString(commandParts[i]);
             hand.addCard(card);
         }
+        for (int i = 6; i < commandParts.length; i++) {
+            dealtCardsArray[dealtCardsInt] = Card.fromString(commandParts[i]);
+            dealtCardsInt++;
+        }
         int pot = Integer.parseInt(commandParts[1]);
         int stack = Integer.parseInt(commandParts[2]);
-        placeBet(hand, stack, pot);
+        placeBet(hand, stack, pot, dealtCardsInt, dealtCardsArray);
     }
 
     /**
      * Implements the player's Acey strategy based on the
      * the player's current hand, bankroll amount, and the current pot.
      * 
-     * @param hand  The player's current hand
-     * @param stack The player's bankroll amount
-     * @param pot   The current pot amount
+     * @param hand            The player's current hand
+     * @param stack           The player's bankroll amount
+     * @param pot             The current pot amount
+     * @param dealtCardsInt   The current number of dealt cards
+     * @param dealtCardsArray The current dealt cards
      */
-    private void placeBet(AceyHand hand, int stack, int pot) {
+    private void placeBet(AceyHand hand, int stack, int pot, int dealtCardsInt, Card[] dealtCardsArray) {
         int difference = hand.getDifference();
         double confidence;
+        int riskFactor = 2;
 
         String decision;
         if (difference == 0) {
             decision = hand.getValue() > 16 ? "low" : "high";
             confidence = 0.3;
+            riskFactor = 3;
         } else if (difference <= 4) {
             decision = "mid";
             confidence = 0;
         } else {
             decision = "mid";
             confidence = 1.0 - (1.0 / difference);
-            confidence = Math.min(confidence, 0.7); // Limit the maximum confidence to 70% to avoid losing all chips
         }
+
+        // Incorporate remaining cards probability
+        int remainingCards = 364 - dealtCardsInt;
+        int favorableCards = hand.getFavorableCards(decision, dealtCardsInt, dealtCardsArray);
+        double probabilityOfWinning = (double) favorableCards / remainingCards;
+        confidence *= probabilityOfWinning;
+        confidence /= riskFactor;
         int bet = (int) (stack * confidence);
         bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
         connection.write(decision + ":" + 0);
@@ -148,7 +169,6 @@ public class Acey {
         if (commandParts.length < 5) {
             throw new IllegalArgumentException("Invalid status message format");
         }
-
         System.out.println("Status: " + commandParts[1]);
     }
 

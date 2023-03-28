@@ -11,6 +11,8 @@ import java.net.Socket;
 public abstract class Dealer {
     protected static final int IP_PORT = 8080;
     protected static final int STARTING_STACK = 500;
+    protected static final String WIN = "win";
+    protected static final String LOSE = "lose";
 
     protected int ipPort;
     protected Deck deck;
@@ -79,6 +81,12 @@ public abstract class Dealer {
             round++;
             System.out.println("ROUND: " + round);
             playRound();
+            // try {
+            // Thread.sleep(200); // Pause for 1 second (1000 milliseconds)
+            // } catch (InterruptedException e) {
+            // // Handle interrupted exception
+            // System.err.println("Interrupted exception");
+            // }
         }
     }
 

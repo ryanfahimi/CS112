@@ -9,7 +9,64 @@
  * server and plays a game of Blackjack.
  */
 public class Blackjack {
+    private static final String LOGIN = "login";
+    private static final String BET = "bet";
+    private static final String PLAY = "play";
+    private static final String STATUS = "status";
+    private static final String DONE = "done";
+    private static final String HIT = "hit";
+    private static final String STAND = "stand";
+    private static final String DOUBLE = "double";
+    private static final String SPLIT = "split";
     private static final int NUM_DECKS = 7;
+    private static final int[] APC_CARD_VALUES = { 1, 2, 2, 3, 2, 1, 0, -1, -2, -2, -2, -2, -1 };
+    private static final String[][] HARD_STRATEGY_CHART = {
+            // 2 3 4 5 6 7 8 9 10 A
+            { HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT }, // 5
+            { HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT }, // 6
+            { HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT, HIT }, // 7
+            { HIT, HIT, HIT, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // 8
+            { DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // 9
+            { DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, HIT, HIT }, // 10
+            { DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE }, // 11
+            { HIT, HIT, STAND, STAND, STAND, HIT, HIT, HIT, HIT, HIT }, // 12
+            { STAND, STAND, STAND, STAND, STAND, HIT, HIT, HIT, HIT, HIT }, // 13
+            { STAND, STAND, STAND, STAND, STAND, HIT, HIT, HIT, HIT, HIT }, // 14
+            { STAND, STAND, STAND, STAND, STAND, HIT, HIT, HIT, HIT, HIT }, // 15
+            { STAND, STAND, STAND, STAND, STAND, HIT, HIT, HIT, HIT, HIT }, // 16
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 17
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 18
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 19
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 20
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 21
+    };
+
+    private static final String[][] SOFT_STRATEGY_CHART = {
+            // 2 3 4 5 6 7 8 9 10 A
+            { HIT, HIT, HIT, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // A2 (13)
+            { HIT, HIT, HIT, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // A3 (14)
+            { HIT, HIT, DOUBLE, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // A4 (15)
+            { HIT, HIT, DOUBLE, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // A5 (16)
+            { HIT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, HIT, HIT, HIT, HIT, HIT }, // A6 (17)
+            { STAND, DOUBLE, DOUBLE, DOUBLE, DOUBLE, STAND, STAND, HIT, HIT, HIT }, // A7 (18)
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // A8 (19)
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // A9 (20)
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // A10 (21)
+    };
+
+    private static final String[][] PAIR_STRATEGY_CHART = {
+            // 2 3 4 5 6 7 8 9 10 A
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, HIT, HIT, HIT, HIT }, // 2, 2
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, HIT, HIT, HIT, HIT }, // 3, 3
+            { HIT, HIT, HIT, SPLIT, SPLIT, HIT, HIT, HIT, HIT, HIT }, // 4, 4
+            { DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, HIT, HIT }, // 5, 5
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, HIT, HIT, HIT, HIT, HIT }, // 6, 6
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, HIT, HIT, HIT, HIT }, // 7, 7
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT }, // 8, 8
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, STAND, SPLIT, SPLIT, STAND, STAND }, // 9, 9
+            { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 10, 10
+            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT } // A, A
+    };
 
     private Connection connection;
     private int count;
@@ -69,25 +126,25 @@ public class Blackjack {
 
             try {
                 switch (command) {
-                    case "login":
+                    case LOGIN:
                         handleLogin(commandParts);
                         break;
 
-                    case "bet":
+                    case BET:
                         // handleBet(commandParts);
                         connection.write("bet:1");
                         break;
 
-                    case "play":
+                    case PLAY:
                         // handlePlay(commandParts);
                         connection.write("stand");
                         break;
 
-                    case "status":
+                    case STATUS:
                         handleStatus(commandParts);
                         break;
 
-                    case "done":
+                    case DONE:
                         handleDone(commandParts);
                         done = true;
                         break;
@@ -147,11 +204,7 @@ public class Blackjack {
         for (int i = 3; i < commandParts.length; i++) {
             Card card = Card.fromString(commandParts[i]);
             int cardValue = card.rank.toInt();
-            if (cardValue >= 2 && cardValue <= 6) {
-                count++;
-            } else if (cardValue == 10 || cardValue == 1) {
-                count--;
-            }
+            count += APC_CARD_VALUES[cardValue - 1];
             dealtCards++;
         }
     }
@@ -163,22 +216,18 @@ public class Blackjack {
      * @return The bet amount
      */
     public int getBet() {
-        double advantage = getAdjustedAdvantage();
-
-        double betAmount = stack * advantage;
-        // Ensure the bet is at least 1 and is an integer
-        bet = (int) Math.max(Math.round(betAmount), 1);
-        return bet;
-    }
-
-    /**
-     * Calculates the player's adjusted advantage based on the true count.
-     *
-     * @return The adjusted advantage
-     */
-    public double getAdjustedAdvantage() {
+        int baseBet = 1; // Base betting unit
         int trueCount = getTrueCount();
-        return 0.05 + 0.01 * trueCount;
+
+        if (trueCount > 1) {
+            double advantage = trueCount * 0.05;
+            bet = (int) Math.round(advantage * stack);
+            bet = Math.max(bet, baseBet);
+        } else {
+            bet = baseBet;
+        }
+        // Ensure the bet is at least 1 and is an integer
+        return bet;
     }
 
     /**
@@ -209,7 +258,8 @@ public class Blackjack {
                 Card card = Card.fromString(commandParts[i]);
                 hand.addCard(card);
             }
-            play(dealerUpCard, hand);
+            String decision = basicStrategy(dealerUpCard, hand);
+            connection.write(decision);
         } catch (IllegalArgumentException e) {
             System.err.println("ERROR: Unable to initialize card: " + e.getMessage());
             System.exit(1);
@@ -217,95 +267,52 @@ public class Blackjack {
     }
 
     /**
-     * Implements the player's Blackjack strategy based on the dealer's upcard and
-     * the player's current hand.
-     * 
-     * @param dealerUpcard The dealer's upcard
-     * @param hand         The player's current hand
+     * Implements basic strategy for playing blackjack based on the dealer's up card
+     * and the player's hand.
+     *
+     * @param dealerUpCard The dealer's up card
+     * @param hand         The player's hand
+     * @return The action to take (HIT, STAND, DOUBLE_DOWN, or SPLIT)
      */
-    public void play(Card dealerUpcard, BlackjackHand hand) {
+    private String basicStrategy(Card dealerUpCard, BlackjackHand hand) {
+        int dealerUpCardValue = dealerUpCard.rank.toInt();
         int handValue = hand.getValue();
-        int dealerUpcardValue = dealerUpcard.rank.toInt();
-        boolean isSoft = hand.isSoft();
+        boolean canDouble = bet * 2 < stack;
+        boolean canSplit = hand.isPair() && bet * 2 < stack;
 
-        if (shouldSplit(hand, dealerUpcardValue)) {
-            connection.write("split");
-            return;
-        }
+        String decision = getDecision(handValue, dealerUpCardValue, hand.isSoft(), canSplit);
 
-        if (shouldDouble(hand, handValue, dealerUpcardValue)) {
-            connection.write("double");
-            return;
+        // Adjust the decision based on whether the player can double or split
+        if (decision.equals(DOUBLE) && !canDouble) {
+            decision = HIT;
         }
-
-        if (shouldHit(isSoft, handValue, dealerUpcardValue)) {
-            connection.write("hit");
-        } else {
-            connection.write("stand");
-        }
+        return decision;
     }
 
-    /**
-     * Determines whether the player should split based on the current hand and the
-     * dealer's upcard value.
-     * 
-     * @param hand              The player's current hand
-     * @param dealerUpcardValue The dealer's upcard value
-     * @return true if the player should split, false otherwise
-     */
-    private boolean shouldSplit(BlackjackHand hand, int dealerUpcardValue) {
-        int handValue = hand.getValue();
+    private static String getDecision(int handValue, int dealerUpCardValue, boolean isSoft, boolean canSplit) {
+        String[][] strategyChart;
+        int rowIndex;
+        int columnIndex;
 
-        if (!hand.isSplittable() || (stack >= bet * 2)) {
-            return false;
-        }
-
-        if (handValue == 16 || hand.isSoft()) { // Split 8s and Aces
-            return true;
-        } else if ((handValue >= 4 && handValue <= 14) && (dealerUpcardValue <= 7 && dealerUpcardValue != 1)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Determines whether the player should double down based on the current hand,
-     * hand value, and the dealer's upcard value.
-     * 
-     * @param hand              The player's current hand
-     * @param handValue         The value of the player's hand
-     * @param dealerUpcardValue The dealer's upcard value
-     * @return true if the player should double down, false otherwise
-     */
-    private boolean shouldDouble(BlackjackHand hand, int handValue, int dealerUpcardValue) {
-        int numCards = hand.getNumCards();
-
-        if ((handValue >= 9 && handValue <= 11) && numCards == 2 && (dealerUpcardValue >= 3 && dealerUpcardValue <= 6)
-                && (stack >= bet * 2)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Determines whether the player should hit based on the softness of the hand,
-     * hand value, and the dealer's upcard value.
-     * 
-     * @param isSoft            A boolean indicating if the hand is soft
-     * @param handValue         The value of the player's hand
-     * @param dealerUpcardValue The dealer's upcard value
-     * @return true if the player should hit, false otherwise
-     */
-    private boolean shouldHit(boolean isSoft, int handValue, int dealerUpcardValue) {
         if (isSoft) {
-            return handValue <= 17 || (handValue == 18
-                    && (dealerUpcardValue == 9 || dealerUpcardValue == 10 || dealerUpcardValue == 1));
+            if (canSplit) {
+                rowIndex = handValue - 3;
+                strategyChart = PAIR_STRATEGY_CHART;
+            } else {
+                rowIndex = handValue - 13;
+                strategyChart = SOFT_STRATEGY_CHART;
+            }
+        } else if (canSplit) {
+            rowIndex = handValue / 2 - 2;
+            strategyChart = PAIR_STRATEGY_CHART;
         } else {
-            return handValue < 12
-                    || (handValue >= 12 && handValue <= 16 && (dealerUpcardValue >= 7 || dealerUpcardValue == 1));
+            rowIndex = handValue - 5;
+            strategyChart = HARD_STRATEGY_CHART;
         }
+
+        columnIndex = dealerUpCardValue - 2;
+
+        return strategyChart[rowIndex][columnIndex];
     }
 
     /**
@@ -315,11 +322,17 @@ public class Blackjack {
      * @throws IllegalArgumentException If the status message format is invalid
      */
     private void handleStatus(String[] commandParts) throws IllegalArgumentException {
-        if (commandParts.length < 6) {
+        if (commandParts.length < 4) {
             throw new IllegalArgumentException("Invalid status message format");
         }
-        System.out.println("Result: " + commandParts[1] + ", Dealer score: " + commandParts[3] + ", Your score: "
-                + commandParts[5]);
+        if (commandParts.length == 4) {
+            System.out.println("Result: " + commandParts[1] + ", Your score: " + commandParts[3]);
+        }
+
+        if (commandParts.length == 6) {
+            System.out.println("Result: " + commandParts[1] + ", Dealer score: " + commandParts[3] + ", Your score: "
+                    + commandParts[5]);
+        }
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 class BlackjackHand extends Hand {
     private int numAces;
+    private int acesConsidered;
 
     /**
      * Constructs an empty BlackjackHand object.
@@ -11,6 +12,7 @@ class BlackjackHand extends Hand {
     public BlackjackHand() {
         super(11); // Maximum 11 cards in a blackjack hand
         numAces = 0;
+        acesConsidered = 0;
     }
 
     /**
@@ -21,26 +23,29 @@ class BlackjackHand extends Hand {
     @Override
     public void addCard(Card card) {
         super.addCard(card);
-        if (card.rank.toInt() == 1) {
+        if (card.rank == Rank.ACE) {
             numAces++;
         }
     }
 
     /**
-     * Returns the numerical value of the hand for Blackjack.
-     * Aces are treated as 1 or 11 depending on the hand value.
+     * Calculates the total value of the hand, considering the best value for Aces.
      *
-     * @return The hand's value
+     * @return the total value of the hand
      */
     @Override
     public int getValue() {
-        int numAces = this.numAces;
-        // Handle aces as either 1 or 11, depending on the hand value
-        while (value + 10 <= 21 && numAces > 0) {
-            value += 10;
-            numAces--;
+        // Handle Aces (value of 1 or 11)
+        while (value > 21 && acesConsidered < numAces) {
+            value -= 10;
+            acesConsidered++;
         }
-        return super.getValue();
+        while (value + 10 <= 21 && acesConsidered > 0) {
+            value += 10; // Subtract 10 to account for the Ace being worth 1 instead of 11
+            acesConsidered--;
+        }
+
+        return value;
     }
 
     /**
@@ -49,7 +54,7 @@ class BlackjackHand extends Hand {
      * @return true if the hand is soft, false otherwise
      */
     public boolean isSoft() {
-        return numAces > 0 && value + 10 < 21;
+        return numAces > acesConsidered;
     }
 
     /**
@@ -57,7 +62,7 @@ class BlackjackHand extends Hand {
      *
      * @return true if the hand is splittable, false otherwise
      */
-    public boolean isSplittable() {
+    public boolean isPair() {
         return numCards == 2 && hand[0].rank.toInt() == hand[1].rank.toInt();
     }
 

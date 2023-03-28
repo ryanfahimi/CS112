@@ -23,6 +23,44 @@ class AceyHand extends Hand {
         }
     }
 
+    public int getFavorableCards(String decision, int dealtCardsInt, Card[] dealtCardsArray) {
+        int favorableCards = 0;
+
+        int firstRank = getFirstCard().rank.toInt();
+        int secondRank = getSecondCard().rank.toInt();
+        int lower = Math.min(firstRank, secondRank);
+        int higher = Math.max(firstRank, secondRank);
+
+        int lowRange, highRange;
+        if (decision.equals("mid")) {
+            lowRange = lower + 1;
+            highRange = higher - 1;
+        } else if (decision.equals("high")) {
+            lowRange = 2;
+            highRange = lower - 1;
+        } else { // decision == "low"
+            lowRange = higher + 1;
+            highRange = 14;
+        }
+
+        for (int i = 2; i <= 14; i++) {
+            if (i == firstRank || i == secondRank) {
+                continue;
+            }
+
+            if (i >= lowRange && i <= highRange) {
+                favorableCards += 28;
+                for (int j = 0; j < dealtCardsInt; j++) {
+                    if (i == dealtCardsArray[j].rank.toInt()) {
+                        favorableCards--;
+                    }
+                }
+            }
+        }
+
+        return favorableCards;
+    }
+
     /**
      * Checks if the AceyHand object is a high hand.
      *
@@ -62,14 +100,14 @@ class AceyHand extends Hand {
                 || (secondRank < thirdRank && thirdRank < firstRank);
     }
 
-    public boolean hasMatchingCard() {
+    public boolean thirdCardMatchesCard() {
         int firstRank = getFirstCard().rank.toInt();
         int secondRank = getSecondCard().rank.toInt();
         int thirdRank = getThirdCard().rank.toInt();
         return firstRank == thirdRank || secondRank == thirdRank;
     }
 
-    public boolean hasAllMatchingCards() {
+    public boolean thirdCardMatchesCards() {
         int firstRank = getFirstCard().rank.toInt();
         int secondRank = getSecondCard().rank.toInt();
         int thirdRank = getThirdCard().rank.toInt();
