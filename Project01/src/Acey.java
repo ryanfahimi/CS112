@@ -9,6 +9,13 @@
  * server and plays a game of AceyDeucey.
  */
 public class Acey {
+    private static final String LOGIN = "login";
+    private static final String PLAY = "play";
+    private static final String STATUS = "status";
+    private static final String DONE = "done";
+    private static final String HIGH = "high";
+    private static final String LOW = "low";
+    private static final String MID = "mid";
     private Connection connection;
 
     public Acey(String ipAddress, int ipPort) {
@@ -54,16 +61,16 @@ public class Acey {
 
             try {
                 switch (command) {
-                    case "login":
+                    case LOGIN:
                         handleLogin(commandParts);
                         break;
-                    case "play":
+                    case PLAY:
                         handlePlay(commandParts);
                         break;
-                    case "status":
+                    case STATUS:
                         handleStatus(commandParts);
                         break;
-                    case "done":
+                    case DONE:
                         handleDone(commandParts);
                         done = true;
                         break;
@@ -137,14 +144,14 @@ public class Acey {
 
         String decision;
         if (difference == 0) {
-            decision = hand.getValue() > 16 ? "low" : "high";
+            decision = hand.getValue() > 16 ? LOW : HIGH;
             confidence = 0.3;
             riskFactor = 3;
         } else if (difference <= 4) {
-            decision = "mid";
+            decision = MID;
             confidence = 0;
         } else {
-            decision = "mid";
+            decision = MID;
             confidence = 1.0 - (1.0 / difference);
         }
 
@@ -156,7 +163,7 @@ public class Acey {
         confidence /= riskFactor;
         int bet = (int) (stack * confidence);
         bet = Math.min(bet, pot); // Ensure the bet is not greater than the pot
-        connection.write(decision + ":" + 0);
+        connection.write(decision + ":" + bet);
     }
 
     /**

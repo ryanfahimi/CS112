@@ -3,6 +3,7 @@
  * Handles the game-specific logic and interactions with the client.
  */
 class BlackjackDealer extends Dealer {
+    private static final String BET = "bet";
     private static final String HIT = "hit";
     private static final String STAND = "stand";
     private static final String DOUBLE = "double";
@@ -47,7 +48,7 @@ class BlackjackDealer extends Dealer {
      * Handles the player's bet.
      */
     private void handleBet() {
-        connection.write("bet:" + stack + deck.getDealtCards());
+        connection.write(BET + ":" + stack + deck.getDealtCards());
         String betResponse = connection.read();
         String[] betResponseParts = betResponse.split(":");
         bet = Integer.parseInt(betResponseParts[1]);
@@ -111,7 +112,7 @@ class BlackjackDealer extends Dealer {
      */
     private void sendPlayCommand() {
         Card dealerUpCard = dealerHand.getHand()[dealerHand.getNumCards() - 1];
-        String playCommand = "play:dealer:" + dealerUpCard + ":you:" + playerHand;
+        String playCommand = PLAY + ":dealer:" + dealerUpCard + ":you:" + playerHand;
         connection.write(playCommand);
     }
 

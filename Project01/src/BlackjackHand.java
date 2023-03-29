@@ -23,7 +23,7 @@ class BlackjackHand extends Hand {
     @Override
     public void addCard(Card card) {
         super.addCard(card);
-        if (card.rank == Rank.ACE) {
+        if (card.RANK == Rank.ACE) {
             numAces++;
         }
     }
@@ -63,7 +63,7 @@ class BlackjackHand extends Hand {
      * @return true if the hand is splittable, false otherwise
      */
     public boolean isPair() {
-        return numCards == 2 && hand[0].rank.toInt() == hand[1].rank.toInt();
+        return numCards == 2 && hand[0].RANK.toInt() == hand[1].RANK.toInt();
     }
 
     /**

@@ -26,7 +26,7 @@ abstract class Hand {
     public void addCard(Card card) {
         if (numCards < hand.length) {
             hand[numCards] = card;
-            value += card.rank.toInt();
+            value += card.RANK.toInt();
             numCards++;
         }
     }

@@ -4,10 +4,10 @@
  */
 enum Rank {
     TWO("2", 2), THREE("3", 3), FOUR("4", 4), FIVE("5", 5), SIX("6", 6), SEVEN("7", 7), EIGHT("8", 8), NINE("9", 9),
-    TEN("10", 10), JACK("J", 11), QUEEN("Q", 12), KING("K", 13), ACE("A", 14);
+    TEN("10", 10), JACK("J", 10), QUEEN("Q", 10), KING("K", 10), ACE("A", 11);
 
-    private final String rankString;
-    private final int rankInt;
+    private final String RANK_STRING;
+    private final int RANK_INT;
 
     /**
      * Constructor for the Rank enumeration.
@@ -16,8 +16,8 @@ enum Rank {
      * @param rankInt    The rank as an int.
      */
     Rank(String rankString, int rankInt) {
-        this.rankString = rankString;
-        this.rankInt = rankInt;
+        this.RANK_STRING = rankString;
+        this.RANK_INT = rankInt;
     }
 
     /**
@@ -27,7 +27,7 @@ enum Rank {
      */
     @Override
     public String toString() {
-        return rankString;
+        return RANK_STRING;
     }
 
     /**
@@ -36,7 +36,7 @@ enum Rank {
      * @return The rank as an int.
      */
     public int toInt() {
-        return rankInt;
+        return RANK_INT;
     }
 
     /**
@@ -46,9 +46,9 @@ enum Rank {
      * @return The corresponding Rank enumeration, or null if no match is found.
      */
     public static Rank fromString(String rankString) {
-        for (Rank rankEnum : Rank.values()) {
-            if (rankEnum.toString().equals(rankString)) {
-                return rankEnum;
+        for (Rank rank : Rank.values()) {
+            if (rank.toString().equals(rankString)) {
+                return rank;
             }
         }
         return null;

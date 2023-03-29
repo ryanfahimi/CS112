@@ -4,7 +4,7 @@
  * decks.
  */
 class Deck {
-    Card[] deck; // Array to hold the deck of 364 playing cards
+    private Card[] deck; // Array to hold the deck of 364 playing cards
     private Card[] dealtCards;
     private int numCards; // Instance variable to track the number of cards left for dealing
 

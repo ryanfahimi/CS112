@@ -131,13 +131,13 @@ public class Blackjack {
                         break;
 
                     case BET:
-                        // handleBet(commandParts);
-                        connection.write("bet:1");
+                        handleBet(commandParts);
+                        // connection.write("bet:1");
                         break;
 
                     case PLAY:
-                        // handlePlay(commandParts);
-                        connection.write("stand");
+                        handlePlay(commandParts);
+                        // connection.write("stand");
                         break;
 
                     case STATUS:
@@ -203,7 +203,7 @@ public class Blackjack {
         count = 0;
         for (int i = 3; i < commandParts.length; i++) {
             Card card = Card.fromString(commandParts[i]);
-            int cardValue = card.rank.toInt();
+            int cardValue = card.RANK.toInt();
             count += APC_CARD_VALUES[cardValue - 1];
             dealtCards++;
         }
@@ -220,7 +220,7 @@ public class Blackjack {
         int trueCount = getTrueCount();
 
         if (trueCount > 1) {
-            double advantage = trueCount * 0.05;
+            double advantage = 0.05 + trueCount * 0.01;
             bet = (int) Math.round(advantage * stack);
             bet = Math.max(bet, baseBet);
         } else {
@@ -275,7 +275,7 @@ public class Blackjack {
      * @return The action to take (HIT, STAND, DOUBLE_DOWN, or SPLIT)
      */
     private String basicStrategy(Card dealerUpCard, BlackjackHand hand) {
-        int dealerUpCardValue = dealerUpCard.rank.toInt();
+        int dealerUpCardValue = dealerUpCard.RANK.toInt();
         int handValue = hand.getValue();
         boolean canDouble = bet * 2 < stack;
         boolean canSplit = hand.isPair() && bet * 2 < stack;

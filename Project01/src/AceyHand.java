@@ -19,15 +19,15 @@ class AceyHand extends Hand {
     public void addCard(Card card) {
         super.addCard(card);
         if (numCards == 2) {
-            difference = Math.abs(hand[1].rank.toInt() - hand[0].rank.toInt());
+            difference = Math.abs(hand[1].RANK.toInt() - hand[0].RANK.toInt());
         }
     }
 
     public int getFavorableCards(String decision, int dealtCardsInt, Card[] dealtCardsArray) {
         int favorableCards = 0;
 
-        int firstRank = getFirstCard().rank.toInt();
-        int secondRank = getSecondCard().rank.toInt();
+        int firstRank = getFirstCard().RANK.toInt();
+        int secondRank = getSecondCard().RANK.toInt();
         int lower = Math.min(firstRank, secondRank);
         int higher = Math.max(firstRank, secondRank);
 
@@ -51,7 +51,7 @@ class AceyHand extends Hand {
             if (i >= lowRange && i <= highRange) {
                 favorableCards += 28;
                 for (int j = 0; j < dealtCardsInt; j++) {
-                    if (i == dealtCardsArray[j].rank.toInt()) {
+                    if (i == dealtCardsArray[j].RANK.toInt()) {
                         favorableCards--;
                     }
                 }
@@ -67,9 +67,9 @@ class AceyHand extends Hand {
      * @return true if the AceyHand object is a high hand, false otherwise.
      */
     public boolean isHigh() {
-        int firstRank = getFirstCard().rank.toInt();
-        int secondRank = getSecondCard().rank.toInt();
-        int thirdRank = getThirdCard().rank.toInt();
+        int firstRank = getFirstCard().RANK.toInt();
+        int secondRank = getSecondCard().RANK.toInt();
+        int thirdRank = getThirdCard().RANK.toInt();
         return numCards == 3 && firstRank == secondRank
                 && thirdRank > firstRank;
     }
@@ -80,9 +80,9 @@ class AceyHand extends Hand {
      * @return true if the AceyHand object is a low hand, false otherwise.
      */
     public boolean isLow() {
-        int firstRank = getFirstCard().rank.toInt();
-        int secondRank = getSecondCard().rank.toInt();
-        int thirdRank = getThirdCard().rank.toInt();
+        int firstRank = getFirstCard().RANK.toInt();
+        int secondRank = getSecondCard().RANK.toInt();
+        int thirdRank = getThirdCard().RANK.toInt();
         return numCards == 3 && firstRank == secondRank
                 && thirdRank < firstRank;
     }
@@ -93,24 +93,24 @@ class AceyHand extends Hand {
      * @return true if the AceyHand object is a mid hand, false otherwise.
      */
     public boolean isMid() {
-        int firstRank = getFirstCard().rank.toInt();
-        int secondRank = getSecondCard().rank.toInt();
-        int thirdRank = getThirdCard().rank.toInt();
+        int firstRank = getFirstCard().RANK.toInt();
+        int secondRank = getSecondCard().RANK.toInt();
+        int thirdRank = getThirdCard().RANK.toInt();
         return numCards == 3 && (firstRank < thirdRank && thirdRank < secondRank)
                 || (secondRank < thirdRank && thirdRank < firstRank);
     }
 
     public boolean thirdCardMatchesCard() {
-        int firstRank = getFirstCard().rank.toInt();
-        int secondRank = getSecondCard().rank.toInt();
-        int thirdRank = getThirdCard().rank.toInt();
+        int firstRank = getFirstCard().RANK.toInt();
+        int secondRank = getSecondCard().RANK.toInt();
+        int thirdRank = getThirdCard().RANK.toInt();
         return firstRank == thirdRank || secondRank == thirdRank;
     }
 
     public boolean thirdCardMatchesCards() {
-        int firstRank = getFirstCard().rank.toInt();
-        int secondRank = getSecondCard().rank.toInt();
-        int thirdRank = getThirdCard().rank.toInt();
+        int firstRank = getFirstCard().RANK.toInt();
+        int secondRank = getSecondCard().RANK.toInt();
+        int thirdRank = getThirdCard().RANK.toInt();
         return firstRank == thirdRank && secondRank == thirdRank;
     }
 

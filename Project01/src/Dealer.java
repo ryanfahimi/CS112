@@ -11,6 +11,10 @@ import java.net.Socket;
 public abstract class Dealer {
     protected static final int IP_PORT = 8080;
     protected static final int STARTING_STACK = 500;
+    protected static final String LOGIN = "login";
+    protected static final String PLAY = "play";
+    protected static final String STATUS = "status";
+    protected static final String DONE = "done";
     protected static final String WIN = "win";
     protected static final String LOSE = "lose";
 
@@ -68,7 +72,7 @@ public abstract class Dealer {
      * Sends a login command to the client.
      */
     protected void sendLoginCommand() {
-        connection.write("login");
+        connection.write(LOGIN);
         String loginResponse = connection.read();
         System.out.println("Received login response: " + loginResponse);
     }
@@ -94,7 +98,7 @@ public abstract class Dealer {
      * Sends a done command to the client and closes the connection.
      */
     private void finishGame() {
-        connection.write("done:Out of chips");
+        connection.write(DONE + ":Out of chips");
         System.out.println("Done: Out of chips");
         connection.close();
     }

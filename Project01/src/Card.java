@@ -2,8 +2,8 @@
  * The Card class represents a playing card with a rank and suit.
  */
 class Card {
-    final Rank rank;
-    final Suit suit;
+    final Rank RANK;
+    final Suit SUIT;
 
     /**
      * Constructs a Card object given a Rank and Suit.
@@ -12,13 +12,13 @@ class Card {
      * @param suit The Suit of the card.
      */
     public Card(Rank rank, Suit suit) {
-        this.rank = rank;
-        this.suit = suit;
+        this.RANK = rank;
+        this.SUIT = suit;
     }
 
     @Override
     public String toString() {
-        return rank.toString() + suit.toString();
+        return RANK.toString() + SUIT.toString();
     }
 
     /**
@@ -34,10 +34,10 @@ class Card {
         for (int i = 1; i <= 2; i++) {
             String rankString = card.substring(0, i).toUpperCase();
             String suitString = card.substring(i).toUpperCase();
-            Rank rankEnum = Rank.fromString(rankString);
-            Suit suitEnum = Suit.fromString(suitString);
-            if (rankEnum != null && suitEnum != null) {
-                return new Card(rankEnum, suitEnum);
+            Rank rank = Rank.fromString(rankString);
+            Suit suit = Suit.fromString(suitString);
+            if (rank != null && suit != null) {
+                return new Card(rank, suit);
             }
         }
         throw new IllegalArgumentException("Invalid card format: " + card);

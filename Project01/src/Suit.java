@@ -5,7 +5,7 @@
 enum Suit {
     SPADES("S"), HEARTS("H"), DIAMONDS("D"), CLUBS("C");
 
-    private final String suitString;
+    private final String SUIT_STRING;
 
     /**
      * Constructor for the Suit enumeration.
@@ -13,7 +13,7 @@ enum Suit {
      * @param suitString The suit as a string.
      */
     Suit(String suitString) {
-        this.suitString = suitString;
+        this.SUIT_STRING = suitString;
     }
 
     /**
@@ -23,7 +23,7 @@ enum Suit {
      */
     @Override
     public String toString() {
-        return suitString;
+        return SUIT_STRING;
     }
 
     /**
@@ -33,9 +33,9 @@ enum Suit {
      * @return The corresponding Suit enumeration, or null if no match is found.
      */
     public static Suit fromString(String suitString) {
-        for (Suit suitEnum : Suit.values()) {
-            if (suitEnum.toString().equals(suitString)) {
-                return suitEnum;
+        for (Suit suit : Suit.values()) {
+            if (suit.toString().equals(suitString)) {
+                return suit;
             }
         }
         return null;

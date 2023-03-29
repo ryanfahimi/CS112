@@ -82,7 +82,7 @@ class AceyDealer extends Dealer {
      * Sends the play command to the client.
      */
     private void sendPlayCommand() {
-        String playCommand = "play:" + pot + ":" + stack + ":" + hand + ":dealt" + deck.getDealtCards();
+        String playCommand = PLAY + ":" + pot + ":" + stack + ":" + hand + ":dealt" + deck.getDealtCards();
         connection.write(playCommand);
         System.out.println("Pot: " + pot + ", Stack " + stack);
     }
@@ -136,17 +136,20 @@ class AceyDealer extends Dealer {
      * @return a string representing the result of the round ("win" or "lose").
      */
     private String determineResult(String decision) {
+        String result;
         hand.addCard(deck.deal());
-        boolean isWin = decision.equals("high") && hand.isHigh() || decision.equals("low") && hand.isLow()
-                || decision.equals("mid") && hand.isMid();
+        boolean isWin = decision.equals(HIGH) && hand.isHigh() || decision.equals(LOW) && hand.isLow()
+                || decision.equals(MID) && hand.isMid();
 
         if (isWin) {
             stack += bet * 2;
             pot -= bet * 2;
+            result = WIN;
         } else {
             // The player loses, and the pot remains the same
             // No need to update the dealer's stack, as it's already deducted in
             // parsePlayerResponse()
+            result = LOSE;
             if (hand.thirdCardMatchesCard()) {
                 if (hand.thirdCardMatchesCards()) {
                     bet *= 2;
@@ -158,7 +161,6 @@ class AceyDealer extends Dealer {
                 }
             }
         }
-        String result = isWin ? WIN : LOSE;
         System.out.println("Result: " + result + ", Bet: " + bet + ", Hand: " + hand);
         return result;
 
@@ -171,7 +173,7 @@ class AceyDealer extends Dealer {
      *               "lose").
      */
     private void sendStatus(String result) {
-        String statusCommand = "status:" + result + ":" + hand;
+        String statusCommand = STATUS + ":" + result + ":" + hand;
         System.out.println("Pot: " + pot + ", Stack: " + stack);
         connection.write(statusCommand);
     }
