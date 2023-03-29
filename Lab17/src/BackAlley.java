@@ -1,4 +1,12 @@
+/**
+ * This class simulates the Back Alley Dice game using the Die and Dice classes.
+ */
 public class BackAlley {
+    /**
+     * Main method that runs the Back Alley Dice game simulation.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         int stack = 20;
         int bet = 1;
