@@ -107,6 +107,13 @@ class AceyHand extends Hand {
         return firstRank == thirdRank || secondRank == thirdRank;
     }
 
+    /**
+     * Checks if the third card in the AceyHand object matches the other two
+     * cards.
+     *
+     * @return true if the third card in the AceyHand object matches the other
+     *         two cards, false otherwise.
+     */
     public boolean thirdCardMatchesCards() {
         int firstRank = getFirstCard().RANK.toInt();
         int secondRank = getSecondCard().RANK.toInt();
@@ -114,20 +121,38 @@ class AceyHand extends Hand {
         return firstRank == thirdRank && secondRank == thirdRank;
     }
 
-    // Getters
-
+    /**
+     * Returns the first card in the AceyHand object.
+     *
+     * @return The first card in the AceyHand object.
+     */
     public Card getFirstCard() {
         return hand[0];
     }
 
+    /**
+     * Returns the second card in the AceyHand object.
+     *
+     * @return The second card in the AceyHand object.
+     */
     public Card getSecondCard() {
         return hand[1];
     }
 
+    /**
+     * Returns the third card in the AceyHand object.
+     *
+     * @return The third card in the AceyHand object.
+     */
     public Card getThirdCard() {
         return hand[2];
     }
 
+    /**
+     * Returns the difference between the two cards in the AceyHand object.
+     *
+     * @return The difference between the two cards in the AceyHand object.
+     */
     public int getDifference() {
         return difference;
     }

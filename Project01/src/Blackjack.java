@@ -65,7 +65,6 @@ public class Blackjack {
             { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT }, // 8, 8
             { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, STAND, SPLIT, SPLIT, STAND, STAND }, // 9, 9
             { STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND, STAND }, // 10, 10
-            { SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT, SPLIT } // A, A
     };
 
     private Connection connection;
@@ -296,8 +295,7 @@ public class Blackjack {
 
         if (isSoft) {
             if (canSplit) {
-                rowIndex = handValue - 3;
-                strategyChart = PAIR_STRATEGY_CHART;
+                return SPLIT;
             } else {
                 rowIndex = handValue - 13;
                 strategyChart = SOFT_STRATEGY_CHART;
