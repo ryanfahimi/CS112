@@ -174,19 +174,34 @@ public class WordSearch {
 	static boolean SearchDown(char[][] puzzle, String word) {
 		final int D = puzzle.length;
 		for (int col = 0; col < D; col++) {
-			StringBuilder colStr = new StringBuilder();
+			StringBuilder thisCol = new StringBuilder();
 			for (int row = 0; row < D; row++) {
-				colStr.append(puzzle[row][col]);
+				thisCol.append(puzzle[row][col]);
 			}
-			final int indx = colStr.indexOf(word);
+			final int indx = thisCol.indexOf(word);
 			if (indx >= 0) {
-				for (int i = indx; i < indx + word.length(); i++) {
-					puzzle[i][col] = ToUpper(puzzle[i][col]);
-				}
+				ConvertColToUpper(puzzle, word, col, indx);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * ConvertColToUpper()
+	 *
+	 * Convert the chars in 'col' of 'puzzle' to UPPERCASE, from position 'indx' to
+	 * 'indx' + 'word'.length()-1.
+	 * 
+	 * @param puzzle - the word search puzzle
+	 * @param word   - the word that was found in 'puzzle'
+	 * @param col    - which column of the puzzle to convert
+	 * @param indx   - which row of 'col' to start converting
+	 */
+	private static void ConvertColToUpper(char[][] puzzle, String word, int col, final int indx) {
+		for (int i = indx; i < indx + word.length(); i++) {
+			puzzle[i][col] = ToUpper(puzzle[i][col]);
+		}
 	}
 
 	/**
