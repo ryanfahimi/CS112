@@ -180,7 +180,7 @@ public class WordSearch {
 			}
 			final int indx = thisCol.indexOf(word);
 			if (indx >= 0) {
-				ConvertColToUpper(puzzle, word, col, indx);
+				ConvertColToUpper(puzzle, col, indx, indx + word.length());
 				return true;
 			}
 		}
@@ -198,9 +198,9 @@ public class WordSearch {
 	 * @param col    - which column of the puzzle to convert
 	 * @param indx   - which row of 'col' to start converting
 	 */
-	private static void ConvertColToUpper(char[][] puzzle, String word, int col, final int indx) {
-		for (int i = indx; i < indx + word.length(); i++) {
-			puzzle[i][col] = ToUpper(puzzle[i][col]);
+	private static void ConvertColToUpper(char[][] puzzle, int col, int start, int end) {
+		for (int n = start; n < end; n++) {
+			puzzle[n][col] = ToUpper(puzzle[n][col]);
 		}
 	}
 
