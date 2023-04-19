@@ -29,7 +29,7 @@ public class Euclid {
             }
 
             int gcf = calculateGCF(A, B);
-            System.out.println("GCF(" + A + ", " + B + ") = " + gcf);
+            System.out.println(gcf);
         } catch (NumberFormatException e) {
             System.err.println("ERROR: Invalid input. Please enter positive integers only.");
         }
