@@ -100,7 +100,9 @@ public class Merge {
                 min = list3.get(k);
             }
 
-            mergedList.add(min);
+            if (!mergedList.contains(min)) {
+                mergedList.add(min);
+            }
 
             if (i < list1.size() && list1.get(i) == min) {
                 i++;
