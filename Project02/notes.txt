@@ -1,0 +1,75 @@
+Testing and Implementation
+--------------------------
+This document outlines the testing strategies and implementation details for the three programs developed in this project: HuffTest.java, Encode.java, and Decode.java.
+
+Part 1 - HuffTest.java
+----------------------
+HuffTest.java is a program designed to test the output files produced by Encode.java and Decode.java to ensure they match the input file. The following test cases were used to validate the functionality of HuffTest.java:
+1. Good Input:
+
+    a. Input files containing only allowed characters:
+        Input File: "Hello, World!"
+        Decoded File: "Hello, World!"
+        Result: PASS
+
+
+    b. Input files containing disallowed characters:
+        Input File: "Hello, こWorld!"
+        Decoded File: "Hello, World!"
+        Result: PASS (The disallowed character 'こ' is skipped)
+
+2. Bad Inputs:
+
+    a. Mismatched content:
+        Input File: "Hello, World!"
+        Decoded File: "Hello, Universe!"
+        Result: FAIL input W @ 7 output U @ 7
+
+
+    b. Mismatched content containing disallowed characters:
+        Input File: "Hello, こWorld!"
+        Decoded File: "Hello, Universe!"
+        Result: FAIL input W @ 8 output U @ 7 (The dissallowed character is skipped but its presence still incriments the index)
+
+3. Edge Cases:
+
+    a. Empty input files:
+        Input File: ""
+        Decoded File: ""
+        Result: PASS
+
+    b. Input files containing only disallowed characters:
+        Input File: "こんにちは世界"
+        Decoded File: ""
+        Result: PASS (All disallowed characters are skipped)
+
+
+
+Part 2 - Encode.java and Decode.java
+------------------------------------
+Encode.java is a program designed to compress text files using the provided Huffman code, while Decode.java is responsible for decompressing the compressed files. The following test cases were used to validate the functionality of these programs:
+
+1. Test Case 1: Simple text file with ASCII characters.
+   Input: "Hello, World!"
+   Test Result: PASS (compression and decompression successful)
+
+2. Test Case 2: Text file with dissallowed characters.
+   Input: "こんにちは世界"
+   Test Result: PASS (disallowed characters ignored)
+
+3. Test Case 4: Text file with a mix of allowed and disallowed characters.
+   Input: "Mixed: Testちは ingちは"
+   Test Result: PASS (disallowed characters ignored)
+
+4. Test Case 5: Empty text file.
+   Input: ""
+   Test Result: PASS (compression and decompression successful)
+
+5. Test Case 6: Large text file.
+   Input: [Large text file with multiple paragraphs]
+   Test Result: PASS (compression and decompression successful)
+
+6. Test Case 7: Text file with repeated patterns.
+   Input: "abababababababababababababababab"
+   Test Result: PASS (compression and decompression successful)
+
