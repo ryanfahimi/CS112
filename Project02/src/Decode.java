@@ -14,15 +14,27 @@ class HuffmanTree {
      * Node is a class that represents a node in the Huffman tree.
      */
     class Node {
-        char character;
-        Node left;
-        Node right;
+        private static final char DEFAULT = (char) 0; // default character
+        final char character;
+        private Node left;
+        private Node right;
 
         /**
          * Constructor for creating a new Node with default values.
          */
         Node() {
-            this.character = (char) 0;
+            this.character = DEFAULT;
+            this.left = null;
+            this.right = null;
+        }
+
+        /**
+         * Constructor for creating a new Node with the given character.
+         *
+         * @param character the character to be stored in the node
+         */
+        Node(char character) {
+            this.character = character;
             this.left = null;
             this.right = null;
         }
@@ -53,17 +65,16 @@ class HuffmanTree {
                 for (char bit : huffmanCode.toCharArray()) {
                     if (bit == '0') {
                         if (currentNode.left == null) {
-                            currentNode.left = new Node();
+                            currentNode.left = new Node(character);
                         }
                         currentNode = currentNode.left;
                     } else if (bit == '1') {
                         if (currentNode.right == null) {
-                            currentNode.right = new Node();
+                            currentNode.right = new Node(character);
                         }
                         currentNode = currentNode.right;
                     }
                 }
-                currentNode.character = character;
             }
         } catch (IOException e) {
             System.err.println("ERROR: Failed to read codebook file - " + e.getMessage());
@@ -83,9 +94,6 @@ class HuffmanTree {
         int c;
         while (currentNode.left != null || currentNode.right != null) {
             c = reader.read();
-            if (c == -1) {
-                return (char) 4; // EOT character
-            }
             char bit = (char) c;
             if (bit == '0') {
                 currentNode = currentNode.left;
@@ -112,6 +120,7 @@ public class Decode {
      * @param args command line arguments
      */
     public static void main(String[] args) {
+        final char EOT = (char) 4; // EOT (End of Transmission) character
         if (args.length != 2) {
             System.err.println("ERROR: Incorrect number of arguments. Expected: <encoded filename> <decoded filename>");
             return;
@@ -126,7 +135,7 @@ public class Decode {
                 BufferedWriter writer = Files.newBufferedWriter(Paths.get(decodedFilename), StandardCharsets.UTF_8)) {
 
             char decodedChar;
-            while ((decodedChar = huffmanTree.decodeNextCharacter(reader)) != (char) 4) {
+            while ((decodedChar = huffmanTree.decodeNextCharacter(reader)) != EOT) {
                 writer.write(decodedChar);
             }
 

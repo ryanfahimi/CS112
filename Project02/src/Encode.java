@@ -11,6 +11,7 @@ import java.util.HashMap;
  * Huffman codebook, then writes the encoded data to an output file.
  */
 public class Encode {
+    private static final char EOT = (char) 4; // EOT (End of Transmission) character
 
     /**
      * The main method that takes two command line arguments: input filename and
@@ -43,10 +44,8 @@ public class Encode {
                 }
             }
 
-            String eotCode = codebook.get((char) 4); // EOT character
-            if (eotCode != null) {
-                writer.write(eotCode);
-            }
+            String eotCode = codebook.get(EOT); // EOT character
+            writer.write(eotCode);
 
         } catch (IOException e) {
             System.err.println("ERROR: " + e.getMessage());
