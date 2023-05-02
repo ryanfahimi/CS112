@@ -41,10 +41,10 @@ public class HuffTest {
      * Checks if the given character is allowed or not.
      *
      * @param c character to check
-     * @return true if the character is allowed, false otherwise
+     * @return true if the character is not allowed, false otherwise
      */
-    private static boolean isAllowedCharacter(char c) {
-        return (c >= '\u0007' && c <= '\u00FE') || c == '\u0004';
+    private static boolean isDisallowedCharacter(char c) {
+        return !(c >= '\u0007' && c <= '\u00FE');
     }
 
     /**
@@ -64,16 +64,16 @@ public class HuffTest {
             int inputPosition = 0, decodedPosition = 0;
 
             while ((inputChar = inputReader.read()) != -1) {
-                if (!isAllowedCharacter((char) inputChar)) {
+                if (isDisallowedCharacter((char) inputChar)) {
                     inputPosition++;
                     continue;
                 }
 
                 while ((decodedChar = decodedReader.read()) != -1) {
-                    if (isAllowedCharacter((char) decodedChar)) {
-                        break;
-                    } else {
+                    if (isDisallowedCharacter((char) decodedChar)) {
                         decodedPosition++;
+                    } else {
+                        break;
                     }
                 }
 
