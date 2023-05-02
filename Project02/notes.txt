@@ -31,6 +31,16 @@ HuffTest.java is a program designed to test the output files produced by Encode.
         Decoded File: "Hello, Universe!"
         Result: FAIL input W @ 8 output U @ 7 (The dissallowed character is skipped but its presence still incriments the index)
 
+    c. Mismatched lengths:
+        Input File: "Hello, World!"
+        Decoded File: "Hello, World"
+        Result: FAIL input ! @ 12 output d @ 11
+
+    d. Mismatched lengths containing the same final character:
+        Input File: "Hello, World!"
+        Decoded File: "Hello, World!!"
+        Result: FAIL input ! @ 12 output ! @ 13
+
 3. Edge Cases:
 
     a. Empty input files:
@@ -42,6 +52,8 @@ HuffTest.java is a program designed to test the output files produced by Encode.
         Input File: "こんにちは世界"
         Decoded File: ""
         Result: PASS (All disallowed characters are skipped)
+
+
 
 
 

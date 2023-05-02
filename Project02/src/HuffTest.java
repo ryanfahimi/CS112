@@ -48,6 +48,33 @@ public class HuffTest {
     }
 
     /**
+     * Reads the next allowed character from the given reader.
+     *
+     * @param reader      the reader to read from
+     * @param tempChar    the next character to read
+     * @param currentChar the current character
+     * @param position    the position of the current character
+     * @return an array of integers containing the next character to read, the
+     *         current character, and the position of the current character
+     * @throws IOException if there's an error reading the file
+     */
+    private static int[] readNextAllowedChar(BufferedReader reader, int tempChar, int currentChar, int position)
+            throws IOException {
+        tempChar = reader.read();
+        if (tempChar != -1) {
+            position++;
+            currentChar = tempChar;
+            while (tempChar != -1 && isDisallowedCharacter((char) currentChar)) {
+                int[] result = readNextAllowedChar(reader, tempChar, currentChar, position);
+                tempChar = result[0];
+                currentChar = result[1];
+                position = result[2];
+            }
+        }
+        return new int[] { tempChar, currentChar, position };
+    }
+
+    /**
      * Compares the given input file and decoded file character by character.
      *
      * @param inputFilename   the path of the input file
@@ -60,31 +87,30 @@ public class HuffTest {
                 BufferedReader decodedReader = Files.newBufferedReader(Paths.get(decodedFilename),
                         StandardCharsets.UTF_8)) {
 
-            int inputChar, decodedChar;
-            int inputPosition = 0, decodedPosition = 0;
+            int[] inputResult;
+            int[] decodedResult;
+            int tempInputChar = 0, tempDecodedChar = 0;
+            int inputChar = 0, decodedChar = 0;
+            int inputPosition = -1, decodedPosition = -1;
 
-            while ((inputChar = inputReader.read()) != -1) {
-                if (isDisallowedCharacter((char) inputChar)) {
-                    inputPosition++;
-                    continue;
-                }
+            while (tempInputChar != -1 || tempDecodedChar != -1) {
+                inputResult = readNextAllowedChar(inputReader, tempInputChar, inputChar,
+                        inputPosition);
+                tempInputChar = inputResult[0];
+                inputChar = inputResult[1];
+                inputPosition = inputResult[2];
 
-                while ((decodedChar = decodedReader.read()) != -1) {
-                    if (isDisallowedCharacter((char) decodedChar)) {
-                        decodedPosition++;
-                    } else {
-                        break;
-                    }
-                }
+                decodedResult = readNextAllowedChar(decodedReader, tempDecodedChar, decodedChar,
+                        decodedPosition);
+                tempDecodedChar = decodedResult[0];
+                decodedChar = decodedResult[1];
+                decodedPosition = decodedResult[2];
 
-                if (inputChar != decodedChar) {
+                if (tempInputChar != tempDecodedChar) {
                     System.out.printf("FAIL input %c @ %d output %c @ %d%n", (char) inputChar, inputPosition,
                             (char) decodedChar, decodedPosition);
                     return false;
                 }
-
-                inputPosition++;
-                decodedPosition++;
             }
 
             return true;
