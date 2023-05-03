@@ -115,7 +115,7 @@ public class HuffTest {
             Char inputChar = new Char();
             Char decodedChar = new Char();
 
-            while (!inputChar.isEOT() && !decodedChar.isEOT()) {
+            while (!(inputChar.isEOT() && decodedChar.isEOT())) {
                 inputChar.readNextAllowedChar(inputReader);
 
                 decodedChar.readNextAllowedChar(decodedReader);
