@@ -40,7 +40,7 @@ public class HuffTest {
          * 
          * @return true if the character is disallowed, false otherwise.
          */
-        private boolean isDisallowedChar() {
+        private boolean isDisallowed() {
             return !(this.temp >= '\u0007' && this.temp <= '\u00FE');
         }
 
@@ -59,7 +59,7 @@ public class HuffTest {
          * @param reader the BufferedReader to read the character from.
          * @throws IOException if there's an issue with reading from the file.
          */
-        private void readNextAllowedChar(BufferedReader reader) throws IOException {
+        private void readNextAllowed(BufferedReader reader) throws IOException {
             boolean eot;
             do {
                 this.temp = reader.read();
@@ -68,7 +68,7 @@ public class HuffTest {
                     break;
                 }
                 this.position++;
-            } while (isDisallowedChar());
+            } while (isDisallowed());
             if (!eot) {
                 this.current = this.temp;
             }
@@ -116,9 +116,9 @@ public class HuffTest {
             Char decodedChar = new Char();
 
             while (!(inputChar.isEOT() && decodedChar.isEOT())) {
-                inputChar.readNextAllowedChar(inputReader);
+                inputChar.readNextAllowed(inputReader);
 
-                decodedChar.readNextAllowedChar(decodedReader);
+                decodedChar.readNextAllowed(decodedReader);
 
                 if (inputChar.temp != decodedChar.temp) {
                     System.out.printf("FAIL input %c @ %d output %c @ %d%n", (char) inputChar.current,
