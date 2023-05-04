@@ -3,8 +3,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * A LavaLamp application that displays a JPanel with a continually changing
+ * background color.
+ * The color change can be toggled on and off by clicking a button.
+ */
 public class LavaLamp extends JPanel {
 
+    // Constants for color change range, panel dimensions, timer delay, initial
+    // color values, button text, and frame title
     private static final int COLOR_CHANGE_RANGE = 4;
     private static final int PANEL_WIDTH = 400;
     private static final int PANEL_HEIGHT = 300;
@@ -24,6 +31,11 @@ public class LavaLamp extends JPanel {
     private boolean isColorChanging;
     private Color backgroundColor;
 
+    /**
+     * The main method that creates and displays the LavaLamp JFrame.
+     *
+     * @param args command line arguments (not used)
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame(FRAME_TITLE);
@@ -31,6 +43,11 @@ public class LavaLamp extends JPanel {
         });
     }
 
+    /**
+     * Configures the given JFrame with the LavaLamp JPanel.
+     *
+     * @param frame the JFrame to configure
+     */
     private static void configureFrame(JFrame frame) {
         LavaLamp lavaLamp = new LavaLamp();
         frame.add(lavaLamp);
@@ -39,32 +56,52 @@ public class LavaLamp extends JPanel {
         frame.setVisible(IS_VISIBLE);
     }
 
+    /**
+     * Constructs a new LavaLamp object.
+     */
     public LavaLamp() {
         initComponents();
     }
 
+    /**
+     * Initializes the LavaLamp components.
+     */
     private void initComponents() {
-        initPanel();
+        configurePanel();
         initTimer();
         initButton();
     }
 
-    private void initPanel() {
+    /**
+     * Configures the LavaLamp JPanel.
+     */
+    private void configurePanel() {
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         initBackgroundColor();
     }
 
+    /**
+     * Initializes the background color of the LavaLamp JPanel.
+     */
     private void initBackgroundColor() {
         backgroundColor = INITIAL_COLOR;
         setBackground(backgroundColor);
         isColorChanging = true;
     }
 
+    /**
+     * Initializes the timer responsible for changing the background color.
+     */
     private void initTimer() {
         timer = new Timer(TIMER_DELAY, this::changeBackgroundColor);
         timer.start();
     }
 
+    /**
+     * Changes the background color of the LavaLamp JPanel.
+     *
+     * @param e the ActionEvent that triggered the color change
+     */
     private void changeBackgroundColor(ActionEvent e) {
         if (isColorChanging) {
             backgroundColor = getRandomColor(backgroundColor);
@@ -72,6 +109,12 @@ public class LavaLamp extends JPanel {
         }
     }
 
+    /**
+     * Generates a random color based on the current color.
+     *
+     * @param currentColor the current background color
+     * @return a new Color object representing the randomly generated color
+     */
     private Color getRandomColor(Color currentColor) {
         int red = clamp(currentColor.getRed()
                 + ThreadLocalRandom.current().nextInt(-COLOR_CHANGE_RANGE, COLOR_CHANGE_RANGE + 1));
@@ -83,23 +126,37 @@ public class LavaLamp extends JPanel {
         return new Color(red, green, blue);
     }
 
+    /**
+     * Clamps the given value between MIN_COLOR_VALUE and MAX_COLOR_VALUE.
+     *
+     * @param value the value to be clamped
+     * @return the clamped value
+     */
     private static int clamp(int value) {
         return Math.min(MAX_COLOR_VALUE, Math.max(MIN_COLOR_VALUE, value));
     }
 
+    /**
+     * Initializes the button for toggling color changing.
+     */
     private void initButton() {
         button = new JButton(BUTTON_TEXT);
         button.addActionListener(e -> toggleColorChanging());
         add(button);
     }
 
+    /**
+     * Toggles the color changing state of the LavaLamp JPanel.
+     * If the color changing is stopped, the current color values are printed to the
+     * console.
+     */
     private void toggleColorChanging() {
         isColorChanging = !isColorChanging;
         if (isColorChanging) {
             timer.start();
         } else {
             timer.stop();
-            System.out.printf("%d,%d,%d\n",
+            System.out.printf("%d,%d,%d%n",
                     backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue());
         }
     }
