@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 /**
  * HuffmanTree is a class that represents a Huffman tree and provides
@@ -15,7 +16,7 @@ class HuffmanTree {
      */
     class Node {
         private static final char DEFAULT = (char) 0; // default character
-        final char character;
+        private char character;
         private Node left;
         private Node right;
 
@@ -43,41 +44,38 @@ class HuffmanTree {
     Node root;
 
     /**
-     * Constructor for creating a new HuffmanTree and initializing the root node.
+     * Constructor for creating a new HuffmanTree with default values.
      */
-    HuffmanTree() {
+    HuffmanTree(HashMap<Character, String> codebook) {
         root = new Node();
-        buildTree();
+        buildTree(codebook);
     }
 
     /**
-     * Builds the Huffman tree using the codebook file.
+     * Builds the Huffman tree using the given codebook.
+     *
+     * @param codebook the codebook used to build the Huffman tree
      */
-    void buildTree() {
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("codebook"), StandardCharsets.UTF_8)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(":");
-                char character = (char) Integer.parseInt(parts[0]);
-                String huffmanCode = parts[1];
+    void buildTree(HashMap<Character, String> codebook) {
+        for (HashMap.Entry<Character, String> entry : codebook.entrySet()) {
+            char character = entry.getKey();
+            String huffmanCode = entry.getValue();
 
-                Node currentNode = root;
-                for (char bit : huffmanCode.toCharArray()) {
-                    if (bit == '0') {
-                        if (currentNode.left == null) {
-                            currentNode.left = new Node(character);
-                        }
-                        currentNode = currentNode.left;
-                    } else if (bit == '1') {
-                        if (currentNode.right == null) {
-                            currentNode.right = new Node(character);
-                        }
-                        currentNode = currentNode.right;
+            Node currentNode = root;
+            for (char bit : huffmanCode.toCharArray()) {
+                if (bit == '0') {
+                    if (currentNode.left == null) {
+                        currentNode.left = new Node();
                     }
+                    currentNode = currentNode.left;
+                } else if (bit == '1') {
+                    if (currentNode.right == null) {
+                        currentNode.right = new Node();
+                    }
+                    currentNode = currentNode.right;
                 }
             }
-        } catch (IOException e) {
-            System.err.println("ERROR: Failed to read codebook file - " + e.getMessage());
+            currentNode.character = character;
         }
     }
 
@@ -91,10 +89,10 @@ class HuffmanTree {
      */
     char decodeNextCharacter(BufferedReader reader) throws IOException {
         Node currentNode = root;
-        int c;
+        int charAsInt;
         while (currentNode.left != null || currentNode.right != null) {
-            c = reader.read();
-            char bit = (char) c;
+            charAsInt = reader.read();
+            char bit = (char) charAsInt;
             if (bit == '0') {
                 currentNode = currentNode.left;
             } else if (bit == '1') {
@@ -111,6 +109,35 @@ class HuffmanTree {
  * and writes the decoded data to an output file.
  */
 public class Decode {
+    private static final String CODEBOOK_FILENAME = "codebook";
+    private static final char EOT = (char) 4; // EOT (End of Transmission) character
+
+    /**
+     * Reads the codebook file and returns a HashMap that maps characters to their
+     * Huffman codes.
+     *
+     * @return a HashMap that maps characters to their Huffman codes
+     */
+    private static HashMap<Character, String> readCodebook() {
+        HashMap<Character, String> codebook = new HashMap<>();
+
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(CODEBOOK_FILENAME), StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length < 2) {
+                    System.err.println("ERROR: Invalid line in codebook - " + line);
+                    continue;
+                }
+                char character = (char) Integer.parseInt(parts[0]);
+                String huffmanCode = parts[1];
+                codebook.put(character, huffmanCode);
+            }
+        } catch (IOException e) {
+            System.err.println("ERROR: Failed to read codebook file - " + e.getMessage());
+        }
+        return codebook;
+    }
 
     /**
      * The main method that takes two command line arguments: encoded filename and
@@ -120,7 +147,6 @@ public class Decode {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        final char EOT = (char) 4; // EOT (End of Transmission) character
         if (args.length != 2) {
             System.err.println("ERROR: Incorrect number of arguments. Expected: <encoded filename> <decoded filename>");
             return;
@@ -129,7 +155,8 @@ public class Decode {
         String encodedFilename = args[0];
         String decodedFilename = args[1];
 
-        HuffmanTree huffmanTree = new HuffmanTree();
+        HashMap<Character, String> codebook = readCodebook();
+        HuffmanTree huffmanTree = new HuffmanTree(codebook);
 
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(encodedFilename), StandardCharsets.UTF_8);
                 BufferedWriter writer = Files.newBufferedWriter(Paths.get(decodedFilename), StandardCharsets.UTF_8)) {

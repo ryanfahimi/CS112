@@ -12,6 +12,7 @@ import java.util.HashMap;
  */
 public class Encode {
     private static final char EOT = (char) 4; // EOT (End of Transmission) character
+    private static final String CODEBOOK_FILENAME = "codebook";
 
     /**
      * The main method that takes two command line arguments: input filename and
@@ -29,15 +30,14 @@ public class Encode {
         String inputFilename = args[0];
         String encodedFilename = args[1];
 
-        HashMap<Character, String> codebook = new HashMap<>();
-        readCodebook(codebook);
+        HashMap<Character, String> codebook = readCodebook();
 
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(inputFilename), StandardCharsets.UTF_8);
                 BufferedWriter writer = Files.newBufferedWriter(Paths.get(encodedFilename), StandardCharsets.UTF_8)) {
 
-            int c;
-            while ((c = reader.read()) != -1) {
-                char character = (char) c;
+            int charAsInt;
+            while ((charAsInt = reader.read()) != -1) {
+                char character = (char) charAsInt;
                 String huffmanCode = codebook.get(character);
                 if (huffmanCode != null) {
                     writer.write(huffmanCode);
@@ -53,18 +53,22 @@ public class Encode {
     }
 
     /**
-     * Reads the codebook file and populates the given HashMap with character to
-     * Huffman code mappings.
+     * Reads the codebook file and returns a HashMap that maps characters to their
+     * Huffman codes.
      *
-     * @param codebook the HashMap to populate with character to Huffman code
-     *                 mappings
+     * @return a HashMap that maps characters to their Huffman codes
      */
-    private static void readCodebook(HashMap<Character, String> codebook) {
+    private static HashMap<Character, String> readCodebook() {
+        HashMap<Character, String> codebook = new HashMap<>();
 
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("codebook"), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(CODEBOOK_FILENAME), StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
+                if (parts.length < 2) {
+                    System.err.println("ERROR: Invalid line in codebook - " + line);
+                    continue;
+                }
                 char character = (char) Integer.parseInt(parts[0]);
                 String huffmanCode = parts[1];
                 codebook.put(character, huffmanCode);
@@ -72,5 +76,6 @@ public class Encode {
         } catch (IOException e) {
             System.err.println("ERROR: Failed to read codebook file - " + e.getMessage());
         }
+        return codebook;
     }
 }
