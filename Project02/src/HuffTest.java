@@ -21,16 +21,16 @@ public class HuffTest {
     /**
      * A helper class to manage characters and positions while reading files.
      */
-    private static class Char {
-        private int temp;
+    private static class CharReader {
+        private int potential;
         private int current;
         private int position;
 
         /**
          * Constructor initializes Char with default values.
          */
-        public Char() {
-            this.temp = 0;
+        public CharReader() {
+            this.potential = 0;
             this.current = 0;
             this.position = -1;
         }
@@ -41,7 +41,7 @@ public class HuffTest {
          * @return true if the character is disallowed, false otherwise.
          */
         private boolean isDisallowed() {
-            return !(this.temp >= '\u0007' && this.temp <= '\u00FE');
+            return !(this.potential >= '\u0007' && this.potential <= '\u00FE');
         }
 
         /**
@@ -50,7 +50,7 @@ public class HuffTest {
          * @return true if the end of the file has been reached, false otherwise.
          */
         private boolean isEOT() {
-            return (this.temp == -1);
+            return (this.potential == -1);
         }
 
         /**
@@ -62,7 +62,7 @@ public class HuffTest {
         private void readNextAllowed(BufferedReader reader) throws IOException {
             boolean eot;
             do {
-                this.temp = reader.read();
+                this.potential = reader.read();
                 eot = isEOT();
                 if (eot) {
                     break;
@@ -70,7 +70,7 @@ public class HuffTest {
                 this.position++;
             } while (isDisallowed());
             if (!eot) {
-                this.current = this.temp;
+                this.current = this.potential;
             }
         }
     }
@@ -112,15 +112,15 @@ public class HuffTest {
                 BufferedReader decodedReader = Files.newBufferedReader(Paths.get(decodedFilename),
                         StandardCharsets.UTF_8)) {
 
-            Char inputChar = new Char();
-            Char decodedChar = new Char();
+            CharReader inputChar = new CharReader();
+            CharReader decodedChar = new CharReader();
 
             while (!(inputChar.isEOT() && decodedChar.isEOT())) {
                 inputChar.readNextAllowed(inputReader);
 
                 decodedChar.readNextAllowed(decodedReader);
 
-                if (inputChar.temp != decodedChar.temp) {
+                if (inputChar.potential != decodedChar.potential) {
                     System.out.printf("FAIL input %c @ %d output %c @ %d%n", (char) inputChar.current,
                             inputChar.position,
                             (char) decodedChar.current, decodedChar.position);
