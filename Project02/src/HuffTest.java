@@ -112,18 +112,18 @@ public class HuffTest {
                 BufferedReader decodedReader = Files.newBufferedReader(Paths.get(decodedFilename),
                         StandardCharsets.UTF_8)) {
 
-            CharReader inputChar = new CharReader();
-            CharReader decodedChar = new CharReader();
+            CharReader inputCharReader = new CharReader();
+            CharReader decodedCharReader = new CharReader();
 
-            while (!(inputChar.isEOT() && decodedChar.isEOT())) {
-                inputChar.readNextAllowed(inputReader);
+            while (!(inputCharReader.isEOT() && decodedCharReader.isEOT())) {
+                inputCharReader.readNextAllowed(inputReader);
 
-                decodedChar.readNextAllowed(decodedReader);
+                decodedCharReader.readNextAllowed(decodedReader);
 
-                if (inputChar.potential != decodedChar.potential) {
-                    System.out.printf("FAIL input %c @ %d output %c @ %d%n", (char) inputChar.current,
-                            inputChar.position,
-                            (char) decodedChar.current, decodedChar.position);
+                if (inputCharReader.potential != decodedCharReader.potential) {
+                    System.out.printf("FAIL input %c @ %d output %c @ %d%n", (char) inputCharReader.current,
+                            inputCharReader.position,
+                            (char) decodedCharReader.current, decodedCharReader.position);
                     return false;
                 }
             }
